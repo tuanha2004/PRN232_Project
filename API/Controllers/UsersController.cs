@@ -92,7 +92,7 @@ namespace API.Controllers
 
         // GET: api/Users/me - Lấy thông tin user đang đăng nhập
         [HttpGet("me")]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<object>> GetCurrentUser()
         {
             try

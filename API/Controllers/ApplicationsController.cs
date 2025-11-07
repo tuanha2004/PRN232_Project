@@ -38,9 +38,9 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Applications/my - User xem đơn ứng tuyển của chính mình
+        // GET: api/Applications/my - Student xem đơn ứng tuyển của chính mình
         [HttpGet("my")]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<IEnumerable<Application>>> GetMyApplications()
         {
             try
@@ -55,7 +55,35 @@ namespace API.Controllers
 
                 var applications = await _context.Applications
                     .Include(a => a.Job)
+                        .ThenInclude(j => j!.Provider)
                     .Where(a => a.StudentId == user.UserId)
+                    .Select(a => new
+                    {
+                        a.ApplicationId,
+                        a.StudentId,
+                        a.JobId,
+                        a.AppliedAt,
+                        a.Status,
+                        a.Phone,
+                        a.StudentYear,
+                        a.WorkType,
+                        a.Notes,
+                        Job = a.Job != null ? new
+                        {
+                            a.Job.JobId,
+                            a.Job.Title,
+                            a.Job.Description,
+                            a.Job.Location,
+                            a.Job.Salary,
+                            a.Job.StartDate,
+                            a.Job.EndDate,
+                            a.Job.Status,
+                            a.Job.CreatedAt,
+                            ProviderName = a.Job.Provider != null ? a.Job.Provider.FullName : null,
+                            ProviderEmail = a.Job.Provider != null ? a.Job.Provider.Email : null,
+                            CompanyName = a.Job.Provider != null ? a.Job.Provider.FullName : null
+                        } : null
+                    })
                     .ToListAsync();
 
                 return Ok(applications);
@@ -100,9 +128,9 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/Applications - User nộp đơn ứng tuyển
+        // POST: api/Applications - Student nộp đơn ứng tuyển
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<Application>> CreateApplication([FromBody] CreateApplicationRequest request)
         {
             try
@@ -155,9 +183,13 @@ namespace API.Controllers
                 _context.Applications.Add(application);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetApplication), 
-                    new { id = application.ApplicationId }, 
-                    application);
+                // Trả về JSON đơn giản thay vì entity
+                return Ok(new 
+                { 
+                    Message = "Đơn ứng tuyển đã được gửi thành công!",
+                    ApplicationId = application.ApplicationId,
+                    Status = application.Status
+                });
             }
             catch (Exception ex)
             {

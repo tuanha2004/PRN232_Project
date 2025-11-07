@@ -5,7 +5,7 @@ USE Project_Prn232;
 GO
 
 -- Xóa dữ liệu demo cũ nếu có
-DELETE FROM Users WHERE Email IN ('admin@example.com', 'user@example.com');
+DELETE FROM Users WHERE Email IN ('admin@example.com', 'student@example.com', 'provider@example.com');
 GO
 
 -- Thêm user Admin
@@ -13,14 +13,19 @@ INSERT INTO Users (FullName, Email, PasswordHash, Role, Phone, Address, CreatedA
 VALUES 
 ('Admin User', 'admin@example.com', 'admin123', 'Admin', '0123456789', 'Ha Noi', GETDATE(), GETDATE(), 'Active');
 
--- Thêm user thường
+-- Thêm user Student (sinh viên)
 INSERT INTO Users (FullName, Email, PasswordHash, Role, Phone, Address, CreatedAt, UpdatedAt, Status)
 VALUES 
-('Normal User', 'user@example.com', 'user123', 'User', '0987654321', 'Ho Chi Minh', GETDATE(), GETDATE(), 'Active');
+('Student User', 'student@example.com', 'student123', 'Student', '0987654321', 'Ho Chi Minh', GETDATE(), GETDATE(), 'Active');
+
+-- Thêm user Provider (nhà tuyển dụng)
+INSERT INTO Users (FullName, Email, PasswordHash, Role, Phone, Address, CreatedAt, UpdatedAt, Status)
+VALUES 
+('Provider User', 'provider@example.com', 'provider123', 'Provider', '0912345678', 'Da Nang', GETDATE(), GETDATE(), 'Active');
 
 GO
 
 -- Kiểm tra kết quả
 SELECT UserId, FullName, Email, Role, Status FROM Users 
-WHERE Email IN ('admin@example.com', 'user@example.com');
+WHERE Email IN ('admin@example.com', 'student@example.com', 'provider@example.com');
 GO

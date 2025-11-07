@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Project_PRN232.Models;
+using Project_PRN232.Models.DTOs;
 using Project_PRN232.Services;
 using System.Diagnostics;
 
@@ -7,30 +8,90 @@ namespace Project_PRN232.Controllers
 {
 	public class HomeController : Controller
 	{
-		private readonly ILogger<HomeController> _logger;
-		private readonly JobService _jobService;
+	private readonly ILogger<HomeController> _logger;
+	private readonly JobService _jobService;
+	private readonly ApplicationService _applicationService;
+	private readonly CheckinService _checkinService;
 
-		public HomeController(ILogger<HomeController> logger, JobService jobService)
-		{
-			_logger = logger;
-			_jobService = jobService;
-		}
-
-		public async Task<IActionResult> Index()
+	public HomeController(ILogger<HomeController> logger, JobService jobService, ApplicationService applicationService, CheckinService checkinService)
+	{
+		_logger = logger;
+		_jobService = jobService;
+		_applicationService = applicationService;
+		_checkinService = checkinService;
+	}		public async Task<IActionResult> Index()
 		{
 			var jobs = await _jobService.GetAllJobsAsync();
 			return View(jobs);
 		}
 
-		public async Task<IActionResult> JobDetail(int id)
+	public async Task<IActionResult> JobDetail(int id)
+	{
+		var job = await _jobService.GetJobByIdAsync(id);
+		if (job == null)
 		{
-			var job = await _jobService.GetJobByIdAsync(id);
-			if (job == null)
+			TempData["ErrorMessage"] = "Không tìm thấy công việc này!";
+			return RedirectToAction("Index");
+		}
+
+		// Kiểm tra xem sinh viên có đơn được approved không
+		var userRole = HttpContext.Session.GetString("UserRole");
+		if (userRole == "Student")
+		{
+			var applications = await _applicationService.GetMyApplicationsAsync();
+			var approvedApp = applications?.FirstOrDefault(a => a.JobId == id && a.Status == "Approved");
+			ViewBag.IsApproved = approvedApp != null;
+
+			// Kiểm tra xem có đang check-in không
+			var currentCheckin = await _checkinService.GetCurrentCheckinAsync();
+			ViewBag.CurrentCheckin = currentCheckin;
+			ViewBag.IsCheckedIn = currentCheckin != null && currentCheckin.JobId == id;
+		}
+		else
+		{
+			ViewBag.IsApproved = false;
+			ViewBag.IsCheckedIn = false;
+		}
+
+		return View(job);
+	}		[HttpPost]
+		public async Task<IActionResult> ApplyJob([FromBody] CreateApplicationRequest request)
+		{
+			try
 			{
-				TempData["ErrorMessage"] = "Không tìm thấy công việc này!";
-				return RedirectToAction("Index");
+				if (request == null)
+				{
+					return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+				}
+
+				// Kiểm tra user đã đăng nhập chưa
+				var token = HttpContext.Session.GetString("JwtToken");
+				if (string.IsNullOrEmpty(token))
+				{
+					return Json(new { success = false, message = "Bạn cần đăng nhập để ứng tuyển" });
+				}
+
+				// Kiểm tra role của user
+				var userRole = HttpContext.Session.GetString("UserRole");
+				if (userRole != "Student" && userRole != "Admin")
+				{
+					return Json(new { success = false, message = "Chỉ sinh viên (Student) mới có thể ứng tuyển. Tài khoản của bạn là: " + userRole });
+				}
+
+				var result = await _applicationService.CreateApplicationAsync(request);
+				
+				return Json(new { success = result.Success, message = result.Message });
 			}
-			return View(job);
+			catch (Exception ex)
+			{
+				return Json(new { success = false, message = "Lỗi: " + ex.Message });
+			}
+		}
+
+		public async Task<IActionResult> MyApplications()
+		{
+			var applications = await _applicationService.GetMyApplicationsAsync();
+			return View(applications);
 		}
 
 		public IActionResult TestApi()
