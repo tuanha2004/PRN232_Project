@@ -17,6 +17,40 @@ namespace API.Controllers
             _context = context;
         }
 
+        // Helper method: Kiểm tra và cập nhật status job tự động
+        private async Task UpdateJobStatusBasedOnDate(Job job)
+        {
+            if (job.EndDate.HasValue && job.Status == "Open")
+            {
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                if (job.EndDate.Value < today)
+                {
+                    job.Status = "Closed";
+                    job.UpdatedAt = DateTime.Now;
+                }
+            }
+        }
+
+        // Helper method: Cập nhật tất cả jobs đã quá hạn
+        private async Task UpdateAllExpiredJobs()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var expiredJobs = await _context.Jobs
+                .Where(j => j.Status == "Open" && j.EndDate.HasValue && j.EndDate.Value < today)
+                .ToListAsync();
+
+            foreach (var job in expiredJobs)
+            {
+                job.Status = "Closed";
+                job.UpdatedAt = DateTime.Now;
+            }
+
+            if (expiredJobs.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
+
         // GET: api/Jobs - Public endpoint, không cần đăng nhập
         [HttpGet(Name = "GetAllJobs")]
         [AllowAnonymous]
@@ -24,9 +58,12 @@ namespace API.Controllers
         {
             try
             {
+                // Tự động cập nhật các job đã hết hạn
+                await UpdateAllExpiredJobs();
+
                 var jobs = await _context.Jobs
                     .Include(j => j.Provider)
-                    .Where(j => j.Status == "Active") // Chỉ hiện job active
+                    .Where(j => j.Status == "Open" || j.Status == "Closed") // Chỉ hiển thị Open và Closed
                     .Select(j => new
                     {
                         j.JobId,
@@ -40,7 +77,8 @@ namespace API.Controllers
                         j.CreatedAt,
                         j.UpdatedAt,
                         ProviderName = j.Provider != null ? j.Provider.FullName : null,
-                        ProviderEmail = j.Provider != null ? j.Provider.Email : null
+                        ProviderEmail = j.Provider != null ? j.Provider.Email : null,
+                        CompanyName = j.Provider != null ? j.Provider.FullName : null // Sử dụng FullName làm CompanyName
                     })
                     .ToListAsync();
                 return Ok(jobs);
@@ -61,21 +99,6 @@ namespace API.Controllers
                 var job = await _context.Jobs
                     .Include(j => j.Provider)
                     .Where(j => j.JobId == id)
-                    .Select(j => new
-                    {
-                        j.JobId,
-                        j.Title,
-                        j.Description,
-                        j.Location,
-                        j.Salary,
-                        j.StartDate,
-                        j.EndDate,
-                        j.Status,
-                        j.CreatedAt,
-                        j.UpdatedAt,
-                        ProviderName = j.Provider != null ? j.Provider.FullName : null,
-                        ProviderEmail = j.Provider != null ? j.Provider.Email : null
-                    })
                     .FirstOrDefaultAsync();
 
                 if (job == null)
@@ -83,7 +106,31 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                return Ok(job);
+                // Kiểm tra và cập nhật status nếu cần
+                await UpdateJobStatusBasedOnDate(job);
+                if (_context.Entry(job).State == EntityState.Modified)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                var result = new
+                {
+                    job.JobId,
+                    job.Title,
+                    job.Description,
+                    job.Location,
+                    job.Salary,
+                    job.StartDate,
+                    job.EndDate,
+                    job.Status,
+                    job.CreatedAt,
+                    job.UpdatedAt,
+                    ProviderName = job.Provider != null ? job.Provider.FullName : null,
+                    ProviderEmail = job.Provider != null ? job.Provider.Email : null,
+                    CompanyName = job.Provider != null ? job.Provider.FullName : null // Sử dụng FullName làm CompanyName
+                };
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -119,7 +166,7 @@ namespace API.Controllers
                     ProviderId = request.ProviderId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Status = "Active"
+                    Status = "Open" // Mặc định là Open khi tạo mới
                 };
 
                 _context.Jobs.Add(job);
@@ -133,9 +180,9 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Jobs/5 - CHỈ ADMIN có thể cập nhật công việc
-        [HttpPut("{id}", Name = "UpdateJobByAdmin")]
-        [Authorize(Roles = "Admin")]
+        // PUT: api/Jobs/5 - CHỈ ADMIN hoặc PROVIDER (chủ job) có thể cập nhật
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Provider")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] UpdateJobRequest request)
         {
             try
@@ -156,6 +203,19 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
+                // Kiểm tra quyền: Provider chỉ có thể update job của mình
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (userRole == "Provider")
+                {
+                    var provider = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                    if (provider == null || job.ProviderId != provider.UserId)
+                    {
+                        return Forbid(); // Provider chỉ có thể update job của họ
+                    }
+                }
+
                 // Cập nhật các fields
                 job.Title = request.Title ?? job.Title;
                 job.Description = request.Description ?? job.Description;
@@ -169,6 +229,104 @@ namespace API.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(new { Message = "Cập nhật thành công", Job = job });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // PUT: api/Jobs/5/close - Provider đóng job của họ
+        [HttpPut("{id}/close")]
+        [Authorize(Roles = "Admin,Provider")]
+        public async Task<IActionResult> CloseJob(int id)
+        {
+            try
+            {
+                var job = await _context.Jobs.FindAsync(id);
+                
+                if (job == null)
+                {
+                    return NotFound(new { Message = "Không tìm thấy công việc" });
+                }
+
+                // Kiểm tra quyền: Provider chỉ có thể đóng job của mình
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (userRole == "Provider")
+                {
+                    var provider = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                    if (provider == null || job.ProviderId != provider.UserId)
+                    {
+                        return Forbid();
+                    }
+                }
+
+                if (job.Status == "Closed")
+                {
+                    return BadRequest(new { Message = "Công việc này đã được đóng" });
+                }
+
+                job.Status = "Closed";
+                job.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "Đã đóng công việc thành công", Job = job });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // PUT: api/Jobs/5/reopen - Provider mở lại job của họ (nếu chưa quá hạn)
+        [HttpPut("{id}/reopen")]
+        [Authorize(Roles = "Admin,Provider")]
+        public async Task<IActionResult> ReopenJob(int id)
+        {
+            try
+            {
+                var job = await _context.Jobs.FindAsync(id);
+                
+                if (job == null)
+                {
+                    return NotFound(new { Message = "Không tìm thấy công việc" });
+                }
+
+                // Kiểm tra quyền
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                if (userRole == "Provider")
+                {
+                    var provider = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                    if (provider == null || job.ProviderId != provider.UserId)
+                    {
+                        return Forbid();
+                    }
+                }
+
+                if (job.Status == "Open")
+                {
+                    return BadRequest(new { Message = "Công việc này đang mở" });
+                }
+
+                // Kiểm tra xem job đã quá hạn chưa
+                if (job.EndDate.HasValue)
+                {
+                    var today = DateOnly.FromDateTime(DateTime.Today);
+                    if (job.EndDate.Value < today)
+                    {
+                        return BadRequest(new { Message = "Không thể mở lại công việc đã quá hạn. Vui lòng cập nhật ngày kết thúc." });
+                    }
+                }
+
+                job.Status = "Open";
+                job.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "Đã mở lại công việc thành công", Job = job });
             }
             catch (Exception ex)
             {

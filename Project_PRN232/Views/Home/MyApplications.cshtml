@@ -1,0 +1,155 @@
+@model List<Project_PRN232.Models.DTOs.ApplicationDto>
+
+@{
+    ViewData["Title"] = "Lịch Sử Ứng Tuyển";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-history me-2 text-primary"></i>Lịch Sử Ứng Tuyển
+                    </h2>
+                    <p class="text-muted">Quản lý và theo dõi các đơn ứng tuyển của bạn</p>
+                </div>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-briefcase me-2"></i>Xem Công Việc
+                </a>
+            </div>
+
+            @if (Model == null || Model.Count == 0)
+            {
+                <!-- Empty State -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-folder-open fa-4x text-muted"></i>
+                        </div>
+                        <h4 class="mb-3">Chưa có đơn ứng tuyển nào</h4>
+                        <p class="text-muted mb-4">
+                            Bạn chưa ứng tuyển công việc nào. Hãy khám phá các công việc phù hợp với bạn!
+                        </p>
+                        <a asp-action="Index" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Tìm Công Việc Ngay
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-warning bg-opacity-10 border-warning">
+                            <div class="card-body text-center">
+                                <h5 class="text-warning mb-1">
+                                    <i class="fas fa-clock me-2"></i>@Model.Count(a => a.Status == "Pending")
+                                </h5>
+                                <p class="text-muted mb-0 small">Đang chờ xét duyệt</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success bg-opacity-10 border-success">
+                            <div class="card-body text-center">
+                                <h5 class="text-success mb-1">
+                                    <i class="fas fa-check-circle me-2"></i>@Model.Count(a => a.Status == "Approved")
+                                </h5>
+                                <p class="text-muted mb-0 small">Đã được duyệt</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-danger bg-opacity-10 border-danger">
+                            <div class="card-body text-center">
+                                <h5 class="text-danger mb-1">
+                                    <i class="fas fa-times-circle me-2"></i>@Model.Count(a => a.Status == "Rejected")
+                                </h5>
+                                <p class="text-muted mb-0 small">Bị từ chối</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications List -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Công Việc</th>
+                                        <th>Ngày Ứng Tuyển</th>
+                                        <th>Loại Công Việc</th>
+                                        <th>Năm Học</th>
+                                        <th>Trạng Thái</th>
+                                        <th class="pe-4 text-end">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var app in Model.OrderByDescending(a => a.AppliedAt))
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div>
+                                                    <h6 class="mb-1">@app.Job.Title</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-building me-1"></i>@(app.Job.CompanyName ?? app.Job.ProviderName ?? "N/A")
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>@(app.AppliedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@app.WorkType</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">Năm @app.StudentYear</span>
+                                            </td>
+                                            <td>
+                                                @if (app.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                                    </span>
+                                                }
+                                                else if (app.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Đã duyệt
+                                                    </span>
+                                                }
+                                                else if (app.Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times me-1"></i>Từ chối
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <a asp-action="JobDetail" asp-route-id="@app.JobId" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Xem chi tiết công việc">
+                                                    <i class="fas fa-eye me-1"></i>Xem Job
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Count -->
+                <div class="text-center mt-3 text-muted">
+                    <small>Tổng cộng: <strong>@Model.Count</strong> đơn ứng tuyển</small>
+                </div>
+            }
+        </div>
+    </div>
+</div>

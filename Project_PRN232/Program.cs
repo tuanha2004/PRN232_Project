@@ -25,6 +25,14 @@ builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddHttpClient<JobService>();
 builder.Services.AddScoped<JobService>();
 
+// Thêm ApplicationService
+builder.Services.AddHttpClient<ApplicationService>();
+builder.Services.AddScoped<ApplicationService>();
+
+// Thêm CheckinService
+builder.Services.AddHttpClient<CheckinService>();
+builder.Services.AddScoped<CheckinService>();
+
 // Thêm IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 

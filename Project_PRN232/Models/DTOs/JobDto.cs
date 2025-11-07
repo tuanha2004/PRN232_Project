@@ -13,5 +13,6 @@ namespace Project_PRN232.Models.DTOs
         public DateTime? CreatedAt { get; set; }
         public string? ProviderName { get; set; }
         public string? ProviderEmail { get; set; }
+        public string? CompanyName { get; set; }
     }
 }

@@ -82,7 +82,7 @@
                 <div class="col-md-3">
                     <select class="form-select" id="statusFilter">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="Open">Đang tuyển</option>
+                        <option value="Open" selected>Đang tuyển</option>
                         <option value="Closed">Đã đóng</option>
                     </select>
                 </div>
@@ -146,11 +146,19 @@
                                 </h5>
                                 @if (job.Status == "Open")
                                 {
-                                    <span class="badge bg-success">Đang tuyển</span>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-door-open me-1"></i>Đang tuyển
+                                    </span>
+                                }
+                                else if (job.Status == "Closed")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-door-closed me-1"></i>Đã đóng
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Đã đóng</span>
+                                    <span class="badge bg-secondary">@job.Status</span>
                                 }
                             </div>
                         </div>
@@ -175,7 +183,7 @@
                             {
                                 <div class="mb-2">
                                     <i class="fas fa-dollar-sign text-success me-2"></i>
-                                    <span class="fw-bold text-success">@job.Salary.Value.ToString("N0") VNĐ</span>
+                                    <span class="fw-bold text-success">@job.Salary.Value.ToString("N0") VNĐ/h</span>
                                 </div>
                             }
 
@@ -261,6 +269,11 @@
         document.getElementById('searchInput')?.addEventListener('input', filterJobs);
         document.getElementById('locationInput')?.addEventListener('input', filterJobs);
         document.getElementById('statusFilter')?.addEventListener('change', filterJobs);
+
+        // Filter jobs when page loads (show only Active by default)
+        window.addEventListener('DOMContentLoaded', function() {
+            filterJobs();
+        });
     </script>
 
     <style>

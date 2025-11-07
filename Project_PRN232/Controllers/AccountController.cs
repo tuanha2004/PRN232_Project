@@ -80,6 +80,15 @@ namespace Project_PRN232.Controllers
             return RedirectToAction("Login");
         }
 
+        // Logout via GET (for redirect after password change)
+        [HttpGet]
+        public IActionResult LogoutRedirect()
+        {
+            _authService.Logout();
+            TempData["SuccessMessage"] = "Đổi mật khẩu thành công! Vui lòng đăng nhập lại với mật khẩu mới.";
+            return RedirectToAction("Login");
+        }
+
         // Trang chỉ dành cho Admin
         [HttpGet]
         public IActionResult AdminDashboard()
@@ -113,7 +122,61 @@ namespace Project_PRN232.Controllers
             ViewBag.UserEmail = _authService.GetUserEmail();
             ViewBag.FullName = _authService.GetFullName();
             ViewBag.UserRole = _authService.GetUserRole();
+            ViewBag.UserPhone = HttpContext.Session.GetString("UserPhone");
+            ViewBag.UserAddress = HttpContext.Session.GetString("UserAddress");
             return View();
+        }
+
+        // Update Profile
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(string fullName, string phone, string address)
+        {
+            if (!_authService.IsLoggedIn())
+            {
+                return RedirectToAction("Login");
+            }
+
+            var result = await _authService.UpdateProfileAsync(fullName, phone, address);
+
+            if (result.Success)
+            {
+                // Cập nhật lại session
+                HttpContext.Session.SetString("FullName", fullName);
+                HttpContext.Session.SetString("UserPhone", phone ?? "");
+                HttpContext.Session.SetString("UserAddress", address ?? "");
+
+                TempData["SuccessMessage"] = result.Message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+            }
+
+            return RedirectToAction("Profile");
+        }
+
+        // Change Password
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword)
+        {
+            if (!_authService.IsLoggedIn())
+            {
+                return RedirectToAction("Login");
+            }
+
+            var result = await _authService.ChangePasswordAsync(currentPassword, newPassword);
+            
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+                // Đăng xuất sau khi đổi mật khẩu thành công
+                return RedirectToAction("LogoutRedirect");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction("Profile");
+            }
         }
 
         // Sign Up
@@ -176,7 +239,8 @@ namespace Project_PRN232.Controllers
             if (result.Success)
             {
                 TempData["SuccessMessage"] = result.Message;
-                return View();
+                // Chuyển sang trang ResetPassword và tự động điền email
+                return RedirectToAction("ResetPassword", new { email = model.Email });
             }
             else
             {
@@ -187,17 +251,23 @@ namespace Project_PRN232.Controllers
 
         // Reset Password
         [HttpGet]
-        public IActionResult ResetPassword(string email = "", string token = "")
+        public IActionResult ResetPassword(string email = "")
         {
             if (_authService.IsLoggedIn())
             {
                 return RedirectToAction("Index", "Home");
             }
 
+            // Nếu không có email, yêu cầu quay lại trang ForgotPassword
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = "Vui lòng yêu cầu đặt lại mật khẩu trước!";
+                return RedirectToAction("ForgotPassword");
+            }
+
             var model = new ResetPasswordRequest
             {
-                Email = email,
-                Token = token
+                Email = email
             };
 
             return View(model);
