@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Project_PRN232.Services;
+using Project_PRN232.Models.DTOs;
 
 namespace Project_PRN232.Controllers
 {

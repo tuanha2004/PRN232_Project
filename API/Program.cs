@@ -36,31 +36,25 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<JwtService>();
 // ---- -------
 
-
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 // ------ DI-----
-
 builder.Services.AddDbContext<ProjectPrn232Context>(option
 	=> option.UseSqlServer(builder.Configuration
 	.GetConnectionString("MyCnn")));
 
-
 builder.Services.AddScoped(typeof(ProjectPrn232Context));
 
+// Configure OData
 var modelBuilder = new ODataConventionModelBuilder();
 //modelBuilder.EntitySet<Account>("Accounts");
 modelBuilder.EntitySet<User>("Users");
-modelBuilder.EntitySet<Job>("Jobs");
+// modelBuilder.EntitySet<Job>("Jobs"); // ❌ REMOVED - Conflict với JobsController
 modelBuilder.EntitySet<Application>("Applications");
 
 // Thêm CheckinRecord với key explicitly
 var checkinRecordEntity = modelBuilder.EntitySet<CheckinRecord>("CheckinRecords");
 checkinRecordEntity.EntityType.HasKey(c => c.CheckinId);
 
+// Add Controllers with OData (chỉ gọi 1 lần)
 builder.Services.AddControllers()
 	.AddOData(opt => opt
 		.AddRouteComponents("api", modelBuilder.GetEdmModel())
@@ -69,6 +63,9 @@ builder.Services.AddControllers()
 		.OrderBy()
 		.SetMaxTop(100)
 		.Count());
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {

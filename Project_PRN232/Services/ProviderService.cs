@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Project_PRN232.Models.DTOs;
 
 namespace Project_PRN232.Services
 {
@@ -281,23 +282,7 @@ namespace Project_PRN232.Services
         }
     }
 
-    // DTOs
-    public class JobDto
-    {
-        public int JobId { get; set; }
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? Location { get; set; }
-        public decimal? Salary { get; set; }
-        public DateOnly? StartDate { get; set; }
-        public DateOnly? EndDate { get; set; }
-        public string? Status { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public List<ApplicationDto>? Applications { get; set; }
-        public List<JobAssignmentDto>? JobAssignments { get; set; }
-    }
-
+    // DTOs cho ProviderService
     public class CreateJobDto
     {
         public string Title { get; set; } = string.Empty;
@@ -317,42 +302,6 @@ namespace Project_PRN232.Services
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
         public string? Status { get; set; }
-    }
-
-    public class ApplicationDto
-    {
-        public int ApplicationId { get; set; }
-        public int? StudentId { get; set; }
-        public int? JobId { get; set; }
-        public string? StudentName { get; set; }
-        public string? StudentEmail { get; set; }
-        public string? Phone { get; set; }
-        public string? StudentYear { get; set; }
-        public string? WorkType { get; set; }
-        public string? Notes { get; set; }
-        public string? Status { get; set; }
-        public DateTime? AppliedAt { get; set; }
-        public StudentDto? Student { get; set; }
-    }
-
-    public class StudentDto
-    {
-        public int UserId { get; set; }
-        public string? FullName { get; set; }
-        public string? Email { get; set; }
-        public string? Phone { get; set; }
-    }
-
-    public class JobAssignmentDto
-    {
-        public int AssignmentId { get; set; }
-        public int? StudentId { get; set; }
-        public string? StudentName { get; set; }
-        public string? StudentEmail { get; set; }
-        public string? StudentPhone { get; set; }
-        public DateTime? AssignedAt { get; set; }
-        public string? Status { get; set; }
-        public StudentDto? Student { get; set; }
     }
 
     public class ProviderStatisticsDto

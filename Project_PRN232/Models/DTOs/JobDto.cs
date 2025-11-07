@@ -11,8 +11,24 @@ namespace Project_PRN232.Models.DTOs
         public DateOnly? EndDate { get; set; }
         public string? Status { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string? ProviderName { get; set; }
         public string? ProviderEmail { get; set; }
         public string? CompanyName { get; set; }
+        
+        // Navigation properties for ProviderJobs views
+        public List<ApplicationDto>? Applications { get; set; }
+        public List<JobAssignmentDto>? JobAssignments { get; set; }
+    }
+    
+    public class JobAssignmentDto
+    {
+        public int AssignmentId { get; set; }
+        public int? StudentId { get; set; }
+        public string? StudentName { get; set; }
+        public string? StudentEmail { get; set; }
+        public string? StudentPhone { get; set; }
+        public DateTime? AssignedAt { get; set; }
+        public string? Status { get; set; }
     }
 }
