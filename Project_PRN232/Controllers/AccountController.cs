@@ -18,9 +18,20 @@ namespace Project_PRN232.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Nếu đã đăng nhập rồi thì redirect về trang chủ
+            // Nếu đã đăng nhập rồi thì redirect về trang tương ứng
             if (_authService.IsLoggedIn())
             {
+                var userRole = _authService.GetUserRole();
+                
+                if (userRole == "Admin")
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                else if (userRole == "Provider")
+                {
+                    return RedirectToAction("Index", "ProviderJobs");
+                }
+                
                 return RedirectToAction("Index", "Home");
             }
 
@@ -40,6 +51,18 @@ namespace Project_PRN232.Controllers
             if (result.Success)
             {
                 TempData["SuccessMessage"] = "Đăng nhập thành công!";
+                
+                // Redirect dựa trên role
+                var userRole = _authService.GetUserRole();
+                if (userRole == "Admin")
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                else if (userRole == "Provider")
+                {
+                    return RedirectToAction("Index", "ProviderJobs");
+                }
+                
                 return RedirectToAction("Index", "Home");
             }
             else

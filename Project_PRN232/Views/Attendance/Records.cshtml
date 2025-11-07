@@ -1,0 +1,154 @@
+@model List<Project_PRN232.Services.AttendanceRecordDto>
+
+@{
+    ViewData["Title"] = "Attendance Records";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-list-check"></i> Attendance Records</h2>
+            <p class="text-muted">Danh sách tất cả check-in/check-out</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a asp-action="DailySummary" class="btn btn-info">
+                <i class="bi bi-calendar-week"></i> Daily Summary
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Total Records: @Model.Count</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped" id="attendanceTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Job</th>
+                                <th>Check-in Time</th>
+                                <th>Check-out Time</th>
+                                <th>Duration (hours)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model)
+                            {
+                                <tr>
+                                    <td>@record.CheckinId</td>
+                                    <td>
+                                        <strong>@record.StudentName</strong><br />
+                                        <small class="text-muted">@record.StudentEmail</small><br />
+                                        <a asp-action="ByStudent" asp-route-studentId="@record.StudentId" class="btn btn-sm btn-outline-info mt-1">
+                                            <i class="bi bi-person-badge"></i> View All
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <strong>@record.JobTitle</strong><br />
+                                        <a asp-action="ByJob" asp-route-jobId="@record.JobId" class="btn btn-sm btn-outline-success mt-1">
+                                            <i class="bi bi-briefcase"></i> View Job
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (record.CheckinTime.HasValue)
+                                        {
+                                            <span>@record.CheckinTime.Value.ToString("dd/MM/yyyy")</span><br />
+                                            <strong>@record.CheckinTime.Value.ToString("HH:mm:ss")</strong>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.CheckoutTime.HasValue)
+                                        {
+                                            <span>@record.CheckoutTime.Value.ToString("dd/MM/yyyy")</span><br />
+                                            <strong>@record.CheckoutTime.Value.ToString("HH:mm:ss")</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.WorkDuration.HasValue)
+                                        {
+                                            <strong class="text-success">@record.WorkDuration.Value.ToString("N2")</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.Status == "Completed")
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Completed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-hourglass-split"></i> In Progress
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@record.CheckinId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Chưa có attendance record nào.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Simple table search/filter
+        $(document).ready(function() {
+            $('#attendanceTable').DataTable({
+                "order": [[0, "desc"]],
+                "pageLength": 25,
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "lengthMenu": "Hiển thị _MENU_ records",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ records",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    }
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,248 @@
+@model List<Project_PRN232.Services.ApplicationDto>
+
+@{
+    ViewData["Title"] = "Quản Lý Applications";
+    var job = ViewBag.Job as Project_PRN232.Services.JobDto;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-file-earmark-text-fill"></i> Applications</h2>
+            @if (job != null)
+            {
+                <p class="text-muted">Job: <strong>@job.Title</strong></p>
+            }
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Details" asp-route-id="@job?.JobId" class="btn btn-info">
+                <i class="bi bi-info-circle"></i> Chi Tiết Job
+            </a>
+            <a asp-action="Jobs" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics -->
+    @if (Model != null && Model.Any())
+    {
+        var pendingCount = Model.Count(a => a.Status == "Pending");
+        var approvedCount = Model.Count(a => a.Status == "Approved");
+        var rejectedCount = Model.Count(a => a.Status == "Rejected");
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h5>Pending</h5>
+                        <h2>@pendingCount</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5>Approved</h5>
+                        <h2>@approvedCount</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5>Rejected</h5>
+                        <h2>@rejectedCount</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Danh Sách Applications</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Contact</th>
+                                <th>Năm Học</th>
+                                <th>Loại Công Việc</th>
+                                <th>Ghi Chú</th>
+                                <th>Ngày Apply</th>
+                                <th>Trạng Thái</th>
+                                <th style="width: 200px;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in Model.OrderByDescending(a => a.AppliedAt))
+                            {
+                                <tr id="app-row-@app.ApplicationId">
+                                    <td>@app.ApplicationId</td>
+                                    <td>
+                                        <strong>@app.StudentName</strong>
+                                    </td>
+                                    <td>
+                                        <small>
+                                            @app.StudentEmail<br />
+                                            @app.Phone
+                                        </small>
+                                    </td>
+                                    <td>@app.StudentYear</td>
+                                    <td>@app.WorkType</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(app.Notes))
+                                        {
+                                            <small>@(app.Notes.Length > 30 ? app.Notes.Substring(0, 30) + "..." : app.Notes)</small>
+                                        }
+                                    </td>
+                                    <td>@app.AppliedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (app.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                        else if (app.Status == "Approved")
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (app.Status == "Pending")
+                                        {
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-success" 
+                                                        onclick="approveApplication(@app.ApplicationId, '@app.StudentName')" 
+                                                        title="Chấp nhận">
+                                                    <i class="bi bi-check-circle-fill"></i> Accept
+                                                </button>
+                                                <button type="button" class="btn btn-danger" 
+                                                        onclick="rejectApplication(@app.ApplicationId, '@app.StudentName')" 
+                                                        title="Từ chối">
+                                                    <i class="bi bi-x-circle-fill"></i> Reject
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Chưa có application nào cho job này.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function approveApplication(appId, studentName) {
+            if (confirm(`Bạn có chắc chắn muốn CHẤP NHẬN application của "${studentName}"?`)) {
+                fetch(`/ProviderJobs/ApproveApplication/${appId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Có lỗi xảy ra: ' + error);
+                });
+            }
+        }
+
+        function rejectApplication(appId, studentName) {
+            if (confirm(`Bạn có chắc chắn muốn TỪ CHỐI application của "${studentName}"?`)) {
+                fetch(`/ProviderJobs/RejectApplication/${appId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('warning', data.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Có lỗi xảy ra: ' + error);
+                });
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+    </script>
+}
+
+<form id="antiforgeryForm">
+    @Html.AntiForgeryToken()
+</form>

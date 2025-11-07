@@ -1,0 +1,180 @@
+@model Project_PRN232.Services.AttendanceDetailDto
+
+@{
+    ViewData["Title"] = "Attendance Details";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-info-circle-fill"></i> Attendance Details</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Records" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model != null)
+    {
+        <div class="row">
+            <!-- Attendance Info -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Attendance Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th style="width: 40%;">Checkin ID:</th>
+                                <td><strong>@Model.CheckinId</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    @if (Model.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Completed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-hourglass-split"></i> In Progress
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Check-in Time:</th>
+                                <td>
+                                    @if (Model.CheckinTime.HasValue)
+                                    {
+                                        <strong class="text-success">@Model.CheckinTime.Value.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Check-out Time:</th>
+                                <td>
+                                    @if (Model.CheckoutTime.HasValue)
+                                    {
+                                        <strong class="text-danger">@Model.CheckoutTime.Value.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa checkout</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Work Duration:</th>
+                                <td>
+                                    @if (Model.WorkDuration.HasValue)
+                                    {
+                                        <h4 class="text-info mb-0">@Model.WorkDuration.Value.ToString("N2") hours</h4>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Info -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-badge-fill"></i> Student Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th style="width: 40%;">Student ID:</th>
+                                <td>@Model.StudentId</td>
+                            </tr>
+                            <tr>
+                                <th>Full Name:</th>
+                                <td><strong>@Model.StudentName</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>
+                                    <a href="mailto:@Model.StudentEmail">@Model.StudentEmail</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Phone:</th>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(Model.StudentPhone))
+                                    {
+                                        <a href="tel:@Model.StudentPhone">@Model.StudentPhone</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <a asp-action="ByStudent" asp-route-studentId="@Model.StudentId" class="btn btn-outline-info w-100">
+                                        <i class="bi bi-list-ul"></i> View All Student's Attendance
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Info -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-briefcase-fill"></i> Job Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Job ID:</strong><br />
+                                @Model.JobId
+                            </div>
+                            <div class="col-md-5">
+                                <strong>Job Title:</strong><br />
+                                <h5 class="text-primary">@Model.JobTitle</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Location:</strong><br />
+                                <i class="bi bi-geo-alt-fill"></i> @Model.JobLocation
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a asp-action="ByJob" asp-route-jobId="@Model.JobId" class="btn btn-success">
+                                <i class="bi bi-list-ul"></i> View All Job's Attendance
+                            </a>
+                            <a asp-controller="ProviderJobs" asp-action="Details" asp-route-id="@Model.JobId" class="btn btn-outline-success">
+                                <i class="bi bi-eye"></i> View Job Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

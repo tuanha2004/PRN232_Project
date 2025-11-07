@@ -36,10 +36,63 @@
                         </li>
                         @if (isLoggedIn && userRole == "Admin")
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="AdminDashboard">
-                                    <i class="bi bi-speedometer2"></i> Admin Dashboard
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-shield-lock-fill"></i> Admin
                                 </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                            <i class="bi bi-speedometer2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                                            <i class="bi bi-people-fill"></i> Quản Lý Users
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="CreateUser">
+                                            <i class="bi bi-person-plus-fill"></i> Tạo User Mới
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        @if (isLoggedIn && userRole == "Provider")
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="providerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-briefcase-fill"></i> Provider
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="providerDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ProviderJobs" asp-action="Index">
+                                            <i class="bi bi-speedometer2"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ProviderJobs" asp-action="Jobs">
+                                            <i class="bi bi-list-ul"></i> Danh Sách Jobs
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ProviderJobs" asp-action="Create">
+                                            <i class="bi bi-plus-circle-fill"></i> Tạo Job Mới
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Attendance" asp-action="Index">
+                                            <i class="bi bi-calendar-check-fill"></i> Attendance
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Attendance" asp-action="Records">
+                                            <i class="bi bi-list-check"></i> Attendance Records
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                     </ul>

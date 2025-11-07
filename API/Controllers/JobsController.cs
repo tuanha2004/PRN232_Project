@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         // GET: api/Jobs - Public endpoint, không cần đăng nhập
-        [HttpGet]
+        [HttpGet(Name = "GetAllJobs")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
@@ -52,7 +52,7 @@ namespace API.Controllers
         }
 
         // GET: api/Jobs/5 - Public endpoint, không cần đăng nhập
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetJobById")]
         [AllowAnonymous]
         public async Task<ActionResult<Job>> GetJob(int id)
         {
@@ -92,7 +92,7 @@ namespace API.Controllers
         }
 
         // POST: api/Jobs - CHỈ ADMIN có thể tạo công việc mới
-        [HttpPost]
+        [HttpPost(Name = "CreateJobByAdmin")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Job>> CreateJob([FromBody] CreateJobRequest request)
         {
@@ -125,7 +125,7 @@ namespace API.Controllers
                 _context.Jobs.Add(job);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetJob), new { id = job.JobId }, job);
+                return CreatedAtAction("GetJobById", new { id = job.JobId }, job);
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace API.Controllers
         }
 
         // PUT: api/Jobs/5 - CHỈ ADMIN có thể cập nhật công việc
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateJobByAdmin")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] UpdateJobRequest request)
         {
@@ -150,7 +150,7 @@ namespace API.Controllers
                 }
 
                 var job = await _context.Jobs.FindAsync(id);
-                
+
                 if (job == null)
                 {
                     return NotFound(new { Message = "Không tìm thấy công việc" });
@@ -177,7 +177,7 @@ namespace API.Controllers
         }
 
         // DELETE: api/Jobs/5 - CHỈ ADMIN có thể xóa công việc
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteJobByAdmin")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteJob(int id)
         {

@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "Provider Dashboard";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-briefcase-fill"></i> Provider Dashboard
+            </h2>
+            <p class="text-muted">Chào mừng, <strong>@ViewBag.FullName</strong></p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        @if (ViewBag.Statistics != null)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Tổng Jobs</h6>
+                                <h2 class="mt-2 mb-0">@ViewBag.Statistics.TotalJobs</h2>
+                                <small>Active: @ViewBag.Statistics.ActiveJobs</small>
+                            </div>
+                            <div>
+                                <i class="bi bi-briefcase-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Applications</h6>
+                                <h2 class="mt-2 mb-0">@ViewBag.Statistics.TotalApplications</h2>
+                                <small>Pending: @ViewBag.Statistics.PendingApplications</small>
+                            </div>
+                            <div>
+                                <i class="bi bi-file-earmark-text-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Students Đang Làm</h6>
+                                <h2 class="mt-2 mb-0">@ViewBag.Statistics.TotalAssignedStudents</h2>
+                            </div>
+                            <div>
+                                <i class="bi bi-people-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Thao Tác Nhanh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Jobs" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bi bi-briefcase fs-3 d-block mb-2"></i>
+                                <strong>Quản Lý Jobs</strong>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Create" class="btn btn-outline-success w-100 py-3">
+                                <i class="bi bi-plus-circle-fill fs-3 d-block mb-2"></i>
+                                <strong>Tạo Job Mới</strong>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-info w-100 py-3">
+                                <i class="bi bi-person-circle fs-3 d-block mb-2"></i>
+                                <strong>Hồ Sơ Của Tôi</strong>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
+                                <i class="bi bi-house-fill fs-3 d-block mb-2"></i>
+                                <strong>Trang Chủ</strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>

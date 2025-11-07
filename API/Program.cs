@@ -53,6 +53,13 @@ builder.Services.AddScoped(typeof(ProjectPrn232Context));
 
 var modelBuilder = new ODataConventionModelBuilder();
 //modelBuilder.EntitySet<Account>("Accounts");
+modelBuilder.EntitySet<User>("Users");
+modelBuilder.EntitySet<Job>("Jobs");
+modelBuilder.EntitySet<Application>("Applications");
+
+// Thêm CheckinRecord với key explicitly
+var checkinRecordEntity = modelBuilder.EntitySet<CheckinRecord>("CheckinRecords");
+checkinRecordEntity.EntityType.HasKey(c => c.CheckinId);
 
 builder.Services.AddControllers()
 	.AddOData(opt => opt
@@ -60,7 +67,7 @@ builder.Services.AddControllers()
 		.Filter()
 		.Select()
 		.OrderBy()
-		.SetMaxTop(2)
+		.SetMaxTop(100)
 		.Count());
 
 builder.Services.AddCors(options =>
@@ -88,9 +95,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
-
-app.UseAuthorization();
-
-app.MapControllers();
 
 app.Run();

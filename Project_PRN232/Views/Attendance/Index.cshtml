@@ -1,0 +1,200 @@
+@using Project_PRN232.Services
+@{
+    ViewData["Title"] = "Attendance Dashboard";
+    var statistics = ViewBag.Statistics as AttendanceStatisticsDto;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-calendar-check-fill"></i> Attendance Dashboard</h2>
+            <p class="text-muted">Theo dõi tình trạng check-in/check-out của students</p>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (statistics != null)
+    {
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">Total Checkins</h6>
+                                <h2 class="card-title mb-0">@statistics.TotalCheckins</h2>
+                            </div>
+                            <i class="bi bi-clock-history" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">Completed</h6>
+                                <h2 class="card-title mb-0">@statistics.CompletedCheckins</h2>
+                            </div>
+                            <i class="bi bi-check-circle-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">In Progress</h6>
+                                <h2 class="card-title mb-0">@statistics.InProgressCheckins</h2>
+                            </div>
+                            <i class="bi bi-hourglass-split" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2">Total Work Hours</h6>
+                                <h2 class="card-title mb-0">@statistics.TotalWorkHours.ToString("N1")</h2>
+                            </div>
+                            <i class="bi bi-alarm-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="bi bi-calendar-month"></i> Monthly Checkins</h5>
+                        <h3 class="text-primary">@statistics.MonthlyCheckins</h3>
+                        <small class="text-muted">Checkins trong tháng này</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="bi bi-graph-up"></i> Average Hours/Checkin</h5>
+                        <h3 class="text-success">@statistics.AverageWorkHoursPerCheckin.ToString("N2")</h3>
+                        <small class="text-muted">Trung bình giờ làm việc</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Students -->
+        @if (statistics.TopStudents != null && statistics.TopStudents.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy-fill"></i> Top Students</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student Name</th>
+                                    <th>Total Checkins</th>
+                                    <th>Completed</th>
+                                    <th>Total Work Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int rank = 1;
+                                }
+                                @foreach (var student in statistics.TopStudents)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (rank == 1)
+                                            {
+                                                <span class="badge bg-warning text-dark">🥇 @rank</span>
+                                            }
+                                            else if (rank == 2)
+                                            {
+                                                <span class="badge bg-secondary">🥈 @rank</span>
+                                            }
+                                            else if (rank == 3)
+                                            {
+                                                <span class="badge bg-info">🥉 @rank</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-dark">@rank</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-action="ByStudent" asp-route-studentId="@student.StudentId" class="text-decoration-none">
+                                                @student.StudentName
+                                            </a>
+                                        </td>
+                                        <td><span class="badge bg-primary">@student.TotalCheckins</span></td>
+                                        <td><span class="badge bg-success">@student.CompletedCheckins</span></td>
+                                        <td><strong>@student.TotalWorkHours.ToString("N2")</strong> hours</td>
+                                    </tr>
+                                    rank++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <a asp-action="Records" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="bi bi-list-ul"></i><br />
+                        All Records
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a asp-action="DailySummary" class="btn btn-outline-info btn-lg w-100">
+                        <i class="bi bi-calendar-week"></i><br />
+                        Daily Summary
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a asp-controller="ProviderJobs" asp-action="Jobs" class="btn btn-outline-success btn-lg w-100">
+                        <i class="bi bi-briefcase"></i><br />
+                        My Jobs
+                    </a>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <a asp-controller="ProviderJobs" asp-action="Index" class="btn btn-outline-secondary btn-lg w-100">
+                        <i class="bi bi-speedometer2"></i><br />
+                        Provider Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

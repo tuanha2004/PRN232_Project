@@ -1,0 +1,115 @@
+@model Project_PRN232.Services.UpdateUserDto
+
+@{
+    ViewData["Title"] = "Chỉnh Sửa User";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil-fill"></i> Chỉnh Sửa User</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong><i class="bi bi-exclamation-triangle-fill"></i> Lỗi:</strong>
+                            @if (ViewBag.ValidationErrors != null)
+                            {
+                                <ul class="mb-0 mt-2">
+                                    @foreach (var error in ViewBag.ValidationErrors)
+                                    {
+                                        <li>@error</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <br />@TempData["ErrorMessage"]
+                            }
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="EditUser" asp-route-id="@ViewBag.UserId" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="mb-3">
+                            <label class="form-label">User ID</label>
+                            <input type="text" class="form-control" value="@ViewBag.UserId" disabled />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="@ViewBag.Email" disabled />
+                            <div class="form-text">Email không thể thay đổi</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">Họ và Tên <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label">Số Điện Thoại</label>
+                            <input asp-for="Phone" class="form-control" placeholder="0123456789" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Địa Chỉ</label>
+                            <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label">Vai Trò <span class="text-danger">*</span></label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="">-- Chọn vai trò --</option>
+                                <option value="Provider">Provider (Nhà cung cấp)</option>
+                                <option value="Student">Student (Sinh viên)</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                            <div class="form-text">Chỉ có thể chọn Provider hoặc Student</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Trạng Thái</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Active">Active (Hoạt động)</option>
+                                <option value="Inactive">Inactive (Vô hiệu)</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày Tạo</label>
+                            <input type="text" class="form-control" value="@(ViewBag.CreatedAt != null ? ((DateTime)ViewBag.CreatedAt).ToString("dd/MM/yyyy HH:mm") : "")" disabled />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cập Nhật Lần Cuối</label>
+                            <input type="text" class="form-control" value="@(ViewBag.UpdatedAt != null ? ((DateTime)ViewBag.UpdatedAt).ToString("dd/MM/yyyy HH:mm") : "")" disabled />
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Users" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Cập Nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

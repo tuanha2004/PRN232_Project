@@ -9,6 +9,18 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<AuthService>();
 builder.Services.AddScoped<AuthService>();
 
+// Thêm AdminService
+builder.Services.AddHttpClient<AdminService>();
+builder.Services.AddScoped<AdminService>();
+
+// Thêm ProviderService
+builder.Services.AddHttpClient<ProviderService>();
+builder.Services.AddScoped<ProviderService>();
+
+// Thêm AttendanceService
+builder.Services.AddHttpClient<AttendanceService>();
+builder.Services.AddScoped<AttendanceService>();
+
 // Thêm JobService
 builder.Services.AddHttpClient<JobService>();
 builder.Services.AddScoped<JobService>();

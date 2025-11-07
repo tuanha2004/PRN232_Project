@@ -1,0 +1,163 @@
+@model Project_PRN232.Services.JobDto
+
+@{
+    ViewData["Title"] = "Chi Tiết Job";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="bi bi-info-circle-fill"></i> Chi Tiết Job</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="Applications" asp-route-id="@Model.JobId" class="btn btn-primary">
+                <i class="bi bi-file-earmark-text-fill"></i> Xem Applications
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.JobId" class="btn btn-warning">
+                <i class="bi bi-pencil-fill"></i> Chỉnh Sửa
+            </a>
+            <a asp-action="Jobs" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">@Model.Title</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Job ID:</strong> @Model.JobId</p>
+                    <p><strong>Địa Điểm:</strong> @Model.Location</p>
+                    <p><strong>Lương:</strong> 
+                        @if (Model.Salary.HasValue)
+                        {
+                            <span class="text-success fw-bold">@Model.Salary.Value.ToString("N0") VNĐ</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Thỏa thuận</span>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Ngày Bắt Đầu:</strong> @Model.StartDate?.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Ngày Kết Thúc:</strong> @Model.EndDate?.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Trạng Thái:</strong> 
+                        @if (Model.Status == "Active")
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else if (Model.Status == "Closed")
+                        {
+                            <span class="badge bg-secondary">Closed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">@Model.Status</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <hr />
+            <h5>Mô Tả:</h5>
+            <p>@Model.Description</p>
+            <hr />
+            <p class="text-muted"><small>Ngày tạo: @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</small></p>
+            <p class="text-muted"><small>Cập nhật: @Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</small></p>
+        </div>
+    </div>
+
+    <!-- Students đang làm việc -->
+    @if (Model.JobAssignments != null && Model.JobAssignments.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Students Đang Làm Việc (@Model.JobAssignments.Count)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Ngày Phân Công</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var assignment in Model.JobAssignments)
+                            {
+                                <tr>
+                                    <td>@assignment.StudentName</td>
+                                    <td>@assignment.StudentEmail</td>
+                                    <td>@assignment.StudentPhone</td>
+                                    <td>@assignment.AssignedAt?.ToString("dd/MM/yyyy")</td>
+                                    <td><span class="badge bg-success">@assignment.Status</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Applications -->
+    @if (Model.Applications != null && Model.Applications.Any())
+    {
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Applications (@Model.Applications.Count)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Năm Học</th>
+                                <th>Loại Công Việc</th>
+                                <th>Ngày Apply</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in Model.Applications)
+                            {
+                                <tr>
+                                    <td>@app.StudentName</td>
+                                    <td>@app.StudentEmail</td>
+                                    <td>@app.Phone</td>
+                                    <td>@app.StudentYear</td>
+                                    <td>@app.WorkType</td>
+                                    <td>@app.AppliedAt?.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (app.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                        else if (app.Status == "Approved")
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -67,7 +67,7 @@ namespace API.Controllers
 				}
 
 				
-				var token = _jwtService.GenerateToken(user.Email!, user.Role ?? "User");
+				var token = _jwtService.GenerateToken(user.Email!, user.Role ?? "User", user.UserId);
 
 				return Ok(new LoginResponse
 				{
