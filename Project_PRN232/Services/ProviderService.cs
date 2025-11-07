@@ -307,7 +307,10 @@ namespace Project_PRN232.Services
     public class ProviderStatisticsDto
     {
         public int TotalJobs { get; set; }
+        // Backwards-compatible: keep ActiveJobs but prefer OpenJobs
         public int ActiveJobs { get; set; }
+        // New property matching API: number of jobs with status "Open"
+        public int OpenJobs { get; set; }
         public int ClosedJobs { get; set; }
         public int TotalApplications { get; set; }
         public int PendingApplications { get; set; }

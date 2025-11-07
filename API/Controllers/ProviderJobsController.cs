@@ -197,7 +197,7 @@ namespace API.Controllers
                     ProviderId = providerId.Value,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Status = "Active" // Mặc định là Active
+                    Status = "Open" // Mặc định là Open
                 };
 
                 _context.Jobs.Add(job);
@@ -569,7 +569,7 @@ namespace API.Controllers
                 }
 
                 var totalJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId);
-                var activeJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Active");
+                var openJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Open");
                 var closedJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Closed");
                 
                 var totalApplications = await _context.Applications
@@ -591,7 +591,7 @@ namespace API.Controllers
                     Data = new
                     {
                         TotalJobs = totalJobs,
-                        ActiveJobs = activeJobs,
+                        OpenJobs = openJobs,
                         ClosedJobs = closedJobs,
                         TotalApplications = totalApplications,
                         PendingApplications = pendingApplications,
