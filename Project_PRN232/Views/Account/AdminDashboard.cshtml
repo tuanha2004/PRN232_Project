@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success">
+                <h4 class="alert-heading">🎉 Chào mừng Admin!</h4>
+                <p>Xin chào <strong>@ViewBag.FullName</strong> (@ViewBag.UserEmail)</p>
+                <hr>
+                <p class="mb-0">Đây là trang dành riêng cho Administrator. Chỉ tài khoản có Role = "Admin" mới có thể truy cập.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Thống kê</div>
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số người dùng</h5>
+                    <p class="card-text display-4">150</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Hoạt động</div>
+                <div class="card-body">
+                    <h5 class="card-title">Đang hoạt động</h5>
+                    <p class="card-text display-4">45</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Chờ duyệt</div>
+                <div class="card-body">
+                    <h5 class="card-title">Yêu cầu mới</h5>
+                    <p class="card-text display-4">12</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quản lý hệ thống</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-people"></i> Quản lý người dùng
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-gear"></i> Cài đặt hệ thống
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-file-text"></i> Báo cáo
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-shield-check"></i> Bảo mật
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

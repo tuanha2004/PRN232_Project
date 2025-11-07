@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Test API";
+}
+
+<div class="container mt-5">
+    <h2>Test API Connection</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5>API Base URL</h5>
+            <p id="apiUrl" class="text-info"></p>
+            
+            <button class="btn btn-primary" onclick="testAPI()">Test API Connection</button>
+            
+            <div id="result" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const apiBaseUrl = '@(new Microsoft.Extensions.Configuration.ConfigurationBuilder().AddJsonFile("appsettings.json").Build()["ApiSettings:BaseUrl"])';
+        document.getElementById('apiUrl').textContent = apiBaseUrl;
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+            
+            try {
+                const response = await fetch(apiBaseUrl + '/api/Jobs');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>Success!</h5>
+                        <p>Status: ${response.status}</p>
+                        <p>Jobs found: ${Array.isArray(data) ? data.length : 'N/A'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Error!</h5>
+                        <p>${error.message}</p>
+                        <p>Make sure API is running at: ${apiBaseUrl}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+}
