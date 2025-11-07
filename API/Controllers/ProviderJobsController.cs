@@ -11,7 +11,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Provider")]
+    [Authorize(Roles = "Provider")] 
     public class ProviderJobsController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
@@ -192,7 +192,7 @@ namespace API.Controllers
                     ProviderId = providerId.Value,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Status = "Active" 
+                    Status = "Open" 
                 };
 
                 _context.Jobs.Add(job);
@@ -551,7 +551,7 @@ namespace API.Controllers
                 }
 
                 var totalJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId);
-                var activeJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Active");
+                var openJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Open");
                 var closedJobs = await _context.Jobs.CountAsync(j => j.ProviderId == providerId && j.Status == "Closed");
                 
                 var totalApplications = await _context.Applications
@@ -573,7 +573,7 @@ namespace API.Controllers
                     Data = new
                     {
                         TotalJobs = totalJobs,
-                        ActiveJobs = activeJobs,
+                        OpenJobs = openJobs,
                         ClosedJobs = closedJobs,
                         TotalApplications = totalApplications,
                         PendingApplications = pendingApplications,

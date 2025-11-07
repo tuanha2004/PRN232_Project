@@ -80,13 +80,13 @@
                                     <td>@job.StartDate?.ToString("dd/MM/yyyy")</td>
                                     <td>@job.EndDate?.ToString("dd/MM/yyyy")</td>
                                     <td>
-                                        @if (job.Status == "Active")
+                                        @if (job.Status == "Open")
                                         {
-                                            <span class="badge bg-success">Active</span>
+                                            <span class="badge bg-success">Open</span>
                                         }
                                         else if (job.Status == "Closed")
                                         {
-                                            <span class="badge bg-secondary">Closed</span>
+                                            <span class="badge bg-danger">Closed</span>
                                         }
                                         else
                                         {
