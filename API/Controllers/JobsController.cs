@@ -1,4 +1,4 @@
-using API.DTOs.Jobs;
+﻿using API.DTOs.Jobs;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +17,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // Helper method: Kiểm tra và cập nhật status job tự động
         private async Task UpdateJobStatusBasedOnDate(Job job)
         {
             if (job.EndDate.HasValue && job.Status == "Open")
@@ -31,7 +30,6 @@ namespace API.Controllers
             }
         }
 
-        // Helper method: Cập nhật tất cả jobs đã quá hạn
         private async Task UpdateAllExpiredJobs()
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
@@ -51,19 +49,18 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Jobs - Public endpoint, không cần đăng nhập
         [HttpGet(Name = "GetAllJobs")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
             try
             {
-                // Tự động cập nhật các job đã hết hạn
+
                 await UpdateAllExpiredJobs();
 
                 var jobs = await _context.Jobs
                     .Include(j => j.Provider)
-                    .Where(j => j.Status == "Open" || j.Status == "Closed") // Chỉ hiển thị Open và Closed
+                    .Where(j => j.Status == "Open" || j.Status == "Closed")
                     .Select(j => new
                     {
                         j.JobId,
@@ -78,7 +75,7 @@ namespace API.Controllers
                         j.UpdatedAt,
                         ProviderName = j.Provider != null ? j.Provider.FullName : null,
                         ProviderEmail = j.Provider != null ? j.Provider.Email : null,
-                        CompanyName = j.Provider != null ? j.Provider.FullName : null // Sử dụng FullName làm CompanyName
+                        CompanyName = j.Provider != null ? j.Provider.FullName : null
                     })
                     .ToListAsync();
                 return Ok(jobs);
@@ -89,7 +86,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Jobs/5 - Public endpoint, không cần đăng nhập
         [HttpGet("{id}", Name = "GetJobById")]
         [AllowAnonymous]
         public async Task<ActionResult<Job>> GetJob(int id)
@@ -106,7 +102,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Kiểm tra và cập nhật status nếu cần
                 await UpdateJobStatusBasedOnDate(job);
                 if (_context.Entry(job).State == EntityState.Modified)
                 {
@@ -127,7 +122,7 @@ namespace API.Controllers
                     job.UpdatedAt,
                     ProviderName = job.Provider != null ? job.Provider.FullName : null,
                     ProviderEmail = job.Provider != null ? job.Provider.Email : null,
-                    CompanyName = job.Provider != null ? job.Provider.FullName : null // Sử dụng FullName làm CompanyName
+                    CompanyName = job.Provider != null ? job.Provider.FullName : null
                 };
 
                 return Ok(result);
@@ -138,7 +133,6 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/Jobs - CHỈ ADMIN có thể tạo công việc mới
         [HttpPost(Name = "CreateJobByAdmin")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Job>> CreateJob([FromBody] CreateJobRequest request)
@@ -154,7 +148,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Map DTO to Entity
                 var job = new Job
                 {
                     Title = request.Title,
@@ -166,7 +159,7 @@ namespace API.Controllers
                     ProviderId = request.ProviderId,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Status = "Open" // Mặc định là Open khi tạo mới
+                    Status = "Open"
                 };
 
                 _context.Jobs.Add(job);
@@ -180,7 +173,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Jobs/5 - CHỈ ADMIN hoặc PROVIDER (chủ job) có thể cập nhật
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Provider")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] UpdateJobRequest request)
@@ -203,7 +195,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Kiểm tra quyền: Provider chỉ có thể update job của mình
                 var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
                 var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -212,11 +203,10 @@ namespace API.Controllers
                     var provider = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                     if (provider == null || job.ProviderId != provider.UserId)
                     {
-                        return Forbid(); // Provider chỉ có thể update job của họ
+                        return Forbid();
                     }
                 }
 
-                // Cập nhật các fields
                 job.Title = request.Title ?? job.Title;
                 job.Description = request.Description ?? job.Description;
                 job.Location = request.Location ?? job.Location;
@@ -236,7 +226,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Jobs/5/close - Provider đóng job của họ
         [HttpPut("{id}/close")]
         [Authorize(Roles = "Admin,Provider")]
         public async Task<IActionResult> CloseJob(int id)
@@ -250,7 +239,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Kiểm tra quyền: Provider chỉ có thể đóng job của mình
                 var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
                 var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -280,7 +268,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Jobs/5/reopen - Provider mở lại job của họ (nếu chưa quá hạn)
         [HttpPut("{id}/reopen")]
         [Authorize(Roles = "Admin,Provider")]
         public async Task<IActionResult> ReopenJob(int id)
@@ -294,7 +281,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Kiểm tra quyền
                 var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
                 var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -312,7 +298,6 @@ namespace API.Controllers
                     return BadRequest(new { Message = "Công việc này đang mở" });
                 }
 
-                // Kiểm tra xem job đã quá hạn chưa
                 if (job.EndDate.HasValue)
                 {
                     var today = DateOnly.FromDateTime(DateTime.Today);
@@ -334,7 +319,6 @@ namespace API.Controllers
             }
         }
 
-        // DELETE: api/Jobs/5 - CHỈ ADMIN có thể xóa công việc
         [HttpDelete("{id}", Name = "DeleteJobByAdmin")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteJob(int id)
@@ -347,7 +331,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Soft delete: Chỉ đổi status thành Inactive
                 job.Status = "Inactive";
                 job.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();

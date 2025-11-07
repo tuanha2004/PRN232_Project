@@ -1,4 +1,4 @@
-using API.DTOs.Applications;
+﻿using API.DTOs.Applications;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Yêu cầu đăng nhập
+    [Authorize]
     public class ApplicationsController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
@@ -18,7 +18,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/Applications - CHỈ ADMIN xem tất cả đơn ứng tuyển
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Application>>> GetAllApplications()
@@ -38,7 +37,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Applications/my - Student xem đơn ứng tuyển của chính mình
         [HttpGet("my")]
         [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<IEnumerable<Application>>> GetMyApplications()
@@ -94,7 +92,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Applications/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Application>> GetApplication(int id)
         {
@@ -110,7 +107,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy đơn ứng tuyển" });
                 }
 
-                // User chỉ xem được đơn của mình, Admin xem được tất cả
                 var userEmail = User.Identity?.Name;
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
@@ -128,7 +124,6 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/Applications - Student nộp đơn ứng tuyển
         [HttpPost]
         [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<Application>> CreateApplication([FromBody] CreateApplicationRequest request)
@@ -152,14 +147,12 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy user" });
                 }
 
-                // Kiểm tra job có tồn tại không
                 var job = await _context.Jobs.FindAsync(request.JobId);
                 if (job == null)
                 {
                     return NotFound(new { Message = "Không tìm thấy công việc" });
                 }
 
-                // Kiểm tra user đã nộp đơn cho job này chưa
                 var existingApplication = await _context.Applications
                     .FirstOrDefaultAsync(a => a.StudentId == user.UserId && a.JobId == request.JobId);
                 
@@ -183,7 +176,6 @@ namespace API.Controllers
                 _context.Applications.Add(application);
                 await _context.SaveChangesAsync();
 
-                // Trả về JSON đơn giản thay vì entity
                 return Ok(new 
                 { 
                     Message = "Đơn ứng tuyển đã được gửi thành công!",
@@ -197,7 +189,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Applications/5/status - CHỈ ADMIN cập nhật trạng thái đơn
         [HttpPut("{id}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateApplicationStatus(int id, [FromBody] UpdateApplicationStatusRequest request)
@@ -231,7 +222,6 @@ namespace API.Controllers
             }
         }
 
-        // DELETE: api/Applications/5 - User xóa đơn của mình, Admin xóa mọi đơn
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApplication(int id)
         {
@@ -244,7 +234,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy đơn ứng tuyển" });
                 }
 
-                // Kiểm tra quyền
                 var userEmail = User.Identity?.Name;
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;

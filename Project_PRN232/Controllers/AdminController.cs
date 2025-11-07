@@ -16,7 +16,6 @@ namespace Project_PRN232.Controllers
             _logger = logger;
         }
 
-        // Kiểm tra quyền Admin
         private bool CheckAdminAccess()
         {
             if (!_authService.IsLoggedIn())
@@ -28,7 +27,6 @@ namespace Project_PRN232.Controllers
             return userRole == "Admin";
         }
 
-        // GET: Admin/Index - Dashboard
         public async Task<IActionResult> Index()
         {
             if (!CheckAdminAccess())
@@ -40,14 +38,12 @@ namespace Project_PRN232.Controllers
             ViewBag.UserEmail = _authService.GetUserEmail();
             ViewBag.FullName = _authService.GetFullName();
 
-            // Lấy thống kê
             var statistics = await _adminService.GetUserStatisticsAsync();
             ViewBag.Statistics = statistics;
 
             return View();
         }
 
-        // GET: Admin/Users - Danh sách users
         public async Task<IActionResult> Users()
         {
             if (!CheckAdminAccess())
@@ -63,7 +59,6 @@ namespace Project_PRN232.Controllers
             return View(users ?? new List<UserDto>());
         }
 
-        // GET: Admin/CreateUser
         public IActionResult CreateUser()
         {
             if (!CheckAdminAccess())
@@ -78,7 +73,6 @@ namespace Project_PRN232.Controllers
             return View();
         }
 
-        // POST: Admin/CreateUser
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(CreateUserDto model)
@@ -105,11 +99,10 @@ namespace Project_PRN232.Controllers
             }
             else
             {
-                // Hiển thị lỗi chi tiết từ API
+
                 ViewBag.UserEmail = _authService.GetUserEmail();
                 ViewBag.FullName = _authService.GetFullName();
-                
-                // Parse multi-line error message
+
                 var errorLines = result.Message.Split('\n');
                 if (errorLines.Length > 1)
                 {
@@ -121,7 +114,6 @@ namespace Project_PRN232.Controllers
             }
         }
 
-        // GET: Admin/EditUser/5
         public async Task<IActionResult> EditUser(int id)
         {
             if (!CheckAdminAccess())
@@ -140,7 +132,6 @@ namespace Project_PRN232.Controllers
                 return RedirectToAction(nameof(Users));
             }
 
-            // Map UserDto sang UpdateUserDto và lưu UserId vào ViewBag
             ViewBag.UserId = user.UserId;
             ViewBag.Email = user.Email;
             ViewBag.CreatedAt = user.CreatedAt;
@@ -158,7 +149,6 @@ namespace Project_PRN232.Controllers
             return View(model);
         }
 
-        // POST: Admin/EditUser/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(int id, UpdateUserDto model)
@@ -171,7 +161,7 @@ namespace Project_PRN232.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Nếu validation fail, load lại thông tin user
+
                 ViewBag.UserEmail = _authService.GetUserEmail();
                 ViewBag.FullName = _authService.GetFullName();
                 
@@ -196,7 +186,7 @@ namespace Project_PRN232.Controllers
             }
             else
             {
-                // Nếu update fail, load lại thông tin user
+
                 ViewBag.UserEmail = _authService.GetUserEmail();
                 ViewBag.FullName = _authService.GetFullName();
                 
@@ -208,8 +198,7 @@ namespace Project_PRN232.Controllers
                     ViewBag.CreatedAt = user.CreatedAt;
                     ViewBag.UpdatedAt = user.UpdatedAt;
                 }
-                
-                // Parse multi-line error message
+
                 var errorLines = result.Message.Split('\n');
                 if (errorLines.Length > 1)
                 {
@@ -221,7 +210,6 @@ namespace Project_PRN232.Controllers
             }
         }
 
-        // POST: Admin/DeleteUser/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
@@ -235,7 +223,6 @@ namespace Project_PRN232.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        // POST: Admin/ToggleStatus/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id)
@@ -249,7 +236,6 @@ namespace Project_PRN232.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        // GET: Admin/ResetPassword/5
         public async Task<IActionResult> ResetPassword(int id)
         {
             if (!CheckAdminAccess())
@@ -272,7 +258,6 @@ namespace Project_PRN232.Controllers
             return View();
         }
 
-        // POST: Admin/ResetPassword/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPasswordConfirm(int id)

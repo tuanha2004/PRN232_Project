@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Project_PRN232.Services
 {
@@ -26,7 +26,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance (OData)
         public async Task<(bool Success, string Message, List<AttendanceRecordDto>? Data)> GetAllAttendanceRecordsAsync()
         {
             try
@@ -37,8 +36,7 @@ namespace Project_PRN232.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    
-                    // API trả về list trực tiếp, không wrap trong ApiResponse
+
                     var records = JsonSerializer.Deserialize<List<AttendanceRecordDto>>(content, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
@@ -55,7 +53,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance/job/{jobId}
         public async Task<(bool Success, string Message, List<AttendanceRecordDto>? Data)> GetAttendanceByJobAsync(int jobId)
         {
             try
@@ -82,7 +79,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance/student/{studentId}
         public async Task<(bool Success, string Message, List<AttendanceRecordDto>? Data)> GetAttendanceByStudentAsync(int studentId)
         {
             try
@@ -109,7 +105,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance/{id}
         public async Task<(bool Success, string Message, AttendanceDetailDto? Data)> GetAttendanceDetailsAsync(int id)
         {
             try
@@ -136,7 +131,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance/statistics
         public async Task<(bool Success, string Message, AttendanceStatisticsDto? Data)> GetStatisticsAsync()
         {
             try
@@ -163,7 +157,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: api/Attendance/summary/daily
         public async Task<(bool Success, string Message, List<DailySummaryDto>? Data)> GetDailySummaryAsync()
         {
             try
@@ -172,7 +165,6 @@ namespace Project_PRN232.Services
                 var response = await _httpClient.GetAsync("/api/Attendance/summary/daily");
                 var content = await response.Content.ReadAsStringAsync();
 
-                // Log để debug
                 Console.WriteLine($"DailySummary Status: {response.StatusCode}");
                 Console.WriteLine($"DailySummary Response: {content}");
 
@@ -186,7 +178,6 @@ namespace Project_PRN232.Services
                     return (apiResponse?.Success ?? false, apiResponse?.Message ?? "", apiResponse?.Data);
                 }
 
-                // Parse error response
                 try
                 {
                     var errorResponse = JsonSerializer.Deserialize<ApiResponse<List<DailySummaryDto>>>(content, new JsonSerializerOptions
@@ -207,7 +198,6 @@ namespace Project_PRN232.Services
         }
     }
 
-    // DTOs
     public class AttendanceRecordDto
     {
         public int CheckinId { get; set; }

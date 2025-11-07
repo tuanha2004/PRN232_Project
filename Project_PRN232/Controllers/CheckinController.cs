@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Project_PRN232.Services;
 
 namespace Project_PRN232.Controllers
@@ -14,7 +14,6 @@ namespace Project_PRN232.Controllers
             _authService = authService;
         }
 
-        // GET: Checkin/Index - Hiển thị lịch sử check-in/check-out
         public async Task<IActionResult> Index()
         {
             if (!_authService.IsLoggedIn())
@@ -39,7 +38,6 @@ namespace Project_PRN232.Controllers
             return View(records);
         }
 
-        // POST: Checkin/Checkin
         [HttpPost]
         public async Task<IActionResult> Checkin([FromBody] CheckinRequestModel request)
         {
@@ -57,7 +55,6 @@ namespace Project_PRN232.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        // POST: Checkin/Checkout
         [HttpPost]
         public async Task<IActionResult> Checkout([FromBody] CheckoutRequestModel request)
         {
@@ -76,7 +73,6 @@ namespace Project_PRN232.Controllers
         }
     }
 
-    // Request models for JSON binding
     public class CheckinRequestModel
     {
         public int JobId { get; set; }

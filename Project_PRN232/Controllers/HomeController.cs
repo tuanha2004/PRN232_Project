@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Project_PRN232.Models;
 using Project_PRN232.Models.DTOs;
 using Project_PRN232.Services;
@@ -34,7 +34,6 @@ namespace Project_PRN232.Controllers
 			return RedirectToAction("Index");
 		}
 
-		// Kiểm tra xem sinh viên có đơn được approved không
 		var userRole = HttpContext.Session.GetString("UserRole");
 		if (userRole == "Student")
 		{
@@ -42,7 +41,6 @@ namespace Project_PRN232.Controllers
 			var approvedApp = applications?.FirstOrDefault(a => a.JobId == id && a.Status == "Approved");
 			ViewBag.IsApproved = approvedApp != null;
 
-			// Kiểm tra xem có đang check-in không
 			var currentCheckin = await _checkinService.GetCurrentCheckinAsync();
 			ViewBag.CurrentCheckin = currentCheckin;
 			ViewBag.IsCheckedIn = currentCheckin != null && currentCheckin.JobId == id;
@@ -64,14 +62,12 @@ namespace Project_PRN232.Controllers
 					return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
 				}
 
-				// Kiểm tra user đã đăng nhập chưa
 				var token = HttpContext.Session.GetString("JwtToken");
 				if (string.IsNullOrEmpty(token))
 				{
 					return Json(new { success = false, message = "Bạn cần đăng nhập để ứng tuyển" });
 				}
 
-				// Kiểm tra role của user
 				var userRole = HttpContext.Session.GetString("UserRole");
 				if (userRole != "Student" && userRole != "Admin")
 				{

@@ -24,7 +24,6 @@ namespace Project_PRN232.Controllers
             return true;
         }
 
-        // GET: Attendance (Dashboard với statistics)
         public async Task<IActionResult> Index()
         {
             if (!CheckProviderAccess())
@@ -42,7 +41,6 @@ namespace Project_PRN232.Controllers
             return View();
         }
 
-        // GET: Attendance/Records (Danh sách tất cả attendance records)
         public async Task<IActionResult> Records()
         {
             if (!CheckProviderAccess())
@@ -60,7 +58,6 @@ namespace Project_PRN232.Controllers
             return View(data ?? new List<AttendanceRecordDto>());
         }
 
-        // GET: Attendance/ByJob/{jobId}
         public async Task<IActionResult> ByJob(int jobId)
         {
             if (!CheckProviderAccess())
@@ -79,7 +76,6 @@ namespace Project_PRN232.Controllers
             return View(data ?? new List<AttendanceRecordDto>());
         }
 
-        // GET: Attendance/ByStudent/{studentId}
         public async Task<IActionResult> ByStudent(int studentId)
         {
             if (!CheckProviderAccess())
@@ -98,7 +94,6 @@ namespace Project_PRN232.Controllers
             return View(data ?? new List<AttendanceRecordDto>());
         }
 
-        // GET: Attendance/Details/{id}
         public async Task<IActionResult> Details(int id)
         {
             if (!CheckProviderAccess())
@@ -116,7 +111,6 @@ namespace Project_PRN232.Controllers
             return View(data);
         }
 
-        // GET: Attendance/DailySummary
         public async Task<IActionResult> DailySummary()
         {
             if (!CheckProviderAccess())
@@ -125,7 +119,6 @@ namespace Project_PRN232.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Debug: Check session
             var token = HttpContext.Session.GetString("JwtToken");
             var role = HttpContext.Session.GetString("UserRole");
             Console.WriteLine($"Token exists: {!string.IsNullOrEmpty(token)}");

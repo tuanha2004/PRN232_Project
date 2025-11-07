@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Project_PRN232.Models.DTOs;
@@ -36,7 +36,6 @@ namespace Project_PRN232.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    // Lưu token vào session
                     if (loginResponse != null && loginResponse.Success && !string.IsNullOrEmpty(loginResponse.Token))
                     {
                         _httpContextAccessor.HttpContext?.Session.SetString("JwtToken", loginResponse.Token);
@@ -111,7 +110,7 @@ namespace Project_PRN232.Services
                     fullName = request.FullName,
                     password = request.Password,
                     phoneNumber = request.PhoneNumber,
-                    role = "Student" // Mặc định role là Student
+                    role = "Student"
                 }, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -251,7 +250,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // Update Profile
         public async Task<(bool Success, string Message)> UpdateProfileAsync(string fullName, string phone, string address)
         {
             try
@@ -264,7 +262,6 @@ namespace Project_PRN232.Services
                     return (false, "Phiên đăng nhập đã hết hạn");
                 }
 
-                // Get user ID from API using /me endpoint
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 
                 var getUserUrl = _configuration["ApiSettings:BaseUrl"] + "/api/Users/me";
@@ -279,7 +276,6 @@ namespace Project_PRN232.Services
                 var userInfo = JsonSerializer.Deserialize<JsonElement>(userContent);
                 var userId = userInfo.GetProperty("userId").GetInt32();
 
-                // Call update user API
                 var apiUrl = _configuration["ApiSettings:BaseUrl"] + $"/api/Users/{userId}";
                 
                 var requestData = new
@@ -297,7 +293,7 @@ namespace Project_PRN232.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Cập nhật lại session với thông tin mới
+
                     _httpContextAccessor.HttpContext?.Session.SetString("FullName", fullName);
                     _httpContextAccessor.HttpContext?.Session.SetString("UserPhone", phone);
                     _httpContextAccessor.HttpContext?.Session.SetString("UserAddress", address);
@@ -319,7 +315,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // Change Password
         public async Task<(bool Success, string Message)> ChangePasswordAsync(string currentPassword, string newPassword)
         {
             try
@@ -332,7 +327,6 @@ namespace Project_PRN232.Services
                     return (false, "Phiên đăng nhập đã hết hạn");
                 }
 
-                // Get user ID from API using /me endpoint
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 
                 var getUserUrl = _configuration["ApiSettings:BaseUrl"] + "/api/Users/me";
@@ -347,7 +341,6 @@ namespace Project_PRN232.Services
                 var userInfo = JsonSerializer.Deserialize<JsonElement>(userContent);
                 var userId = userInfo.GetProperty("userId").GetInt32();
 
-                // Call change password API
                 var apiUrl = _configuration["ApiSettings:BaseUrl"] + $"/api/Users/{userId}/change-password";
                 
                 var requestData = new

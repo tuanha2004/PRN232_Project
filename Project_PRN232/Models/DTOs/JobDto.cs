@@ -1,4 +1,4 @@
-namespace Project_PRN232.Models.DTOs
+﻿namespace Project_PRN232.Models.DTOs
 {
     public class JobDto
     {
@@ -15,8 +15,7 @@ namespace Project_PRN232.Models.DTOs
         public string? ProviderName { get; set; }
         public string? ProviderEmail { get; set; }
         public string? CompanyName { get; set; }
-        
-        // Navigation properties for ProviderJobs views
+
         public List<ApplicationDto>? Applications { get; set; }
         public List<JobAssignmentDto>? JobAssignments { get; set; }
     }

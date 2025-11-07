@@ -1,4 +1,4 @@
-using API.DTOs.CheckinRecords;
+﻿using API.DTOs.CheckinRecords;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/CheckinRecords/my-records
         [HttpGet("my-records")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<IEnumerable<CheckinRecordResponse>>> GetMyCheckinRecords()
@@ -59,7 +58,6 @@ namespace API.Controllers
             return Ok(records);
         }
 
-        // GET: api/CheckinRecords/current
         [HttpGet("current")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<CheckinRecordResponse>> GetCurrentCheckin()
@@ -76,7 +74,6 @@ namespace API.Controllers
                 return NotFound(new { message = "Người dùng không tồn tại" });
             }
 
-            // Tìm checkin record chưa checkout
             var currentCheckin = await _context.CheckinRecords
                 .Include(c => c.Job)
                 .Include(c => c.Student)
@@ -105,7 +102,6 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        // POST: api/CheckinRecords/checkin
         [HttpPost("checkin")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<CheckinRecordResponse>> Checkin([FromBody] CheckinRequest request)
@@ -137,14 +133,12 @@ namespace API.Controllers
                 return NotFound(new { message = "Người dùng không tồn tại" });
             }
 
-            // Kiểm tra job có tồn tại không
             var job = await _context.Jobs.FindAsync(request.JobId);
             if (job == null)
             {
                 return NotFound(new { message = "Công việc không tồn tại" });
             }
 
-            // Kiểm tra xem đã check-in chưa checkout chưa
             var existingCheckin = await _context.CheckinRecords
                 .Where(c => c.StudentId == user.UserId && c.CheckoutTime == null)
                 .FirstOrDefaultAsync();
@@ -154,7 +148,6 @@ namespace API.Controllers
                 return BadRequest(new { message = "Bạn đã check-in rồi. Vui lòng check-out trước khi check-in lại." });
             }
 
-            // Kiểm tra xem sinh viên có được approved cho job này không
             var application = await _context.Applications
                 .FirstOrDefaultAsync(a => a.StudentId == user.UserId 
                     && a.JobId == request.JobId 
@@ -162,7 +155,7 @@ namespace API.Controllers
 
             if (application == null)
             {
-                // Kiểm tra xem có application nào không
+
                 var anyApplication = await _context.Applications
                     .FirstOrDefaultAsync(a => a.StudentId == user.UserId && a.JobId == request.JobId);
                 
@@ -176,7 +169,6 @@ namespace API.Controllers
                 }
             }
 
-            // Tạo checkin record mới
             var checkinRecord = new CheckinRecord
             {
                 StudentId = user.UserId,
@@ -204,7 +196,6 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetCurrentCheckin), response);
         }
 
-        // POST: api/CheckinRecords/checkout
         [HttpPost("checkout")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<CheckinRecordResponse>> Checkout([FromBody] CheckoutRequest request)
@@ -226,7 +217,6 @@ namespace API.Controllers
                 return NotFound(new { message = "Người dùng không tồn tại" });
             }
 
-            // Tìm checkin record
             var checkinRecord = await _context.CheckinRecords
                 .Include(c => c.Job)
                 .Include(c => c.Student)
@@ -242,7 +232,6 @@ namespace API.Controllers
                 return BadRequest(new { message = "Bạn đã check-out rồi" });
             }
 
-            // Cập nhật checkout time
             checkinRecord.CheckoutTime = DateTime.Now;
             await _context.SaveChangesAsync();
 
@@ -266,7 +255,6 @@ namespace API.Controllers
             return Ok(response);
         }
 
-        // GET: api/CheckinRecords/job/{jobId}/records
         [HttpGet("job/{jobId}/records")]
         [Authorize(Roles = "Admin,Provider")]
         public async Task<ActionResult<IEnumerable<CheckinRecordResponse>>> GetJobCheckinRecords(int jobId)

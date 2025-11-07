@@ -1,4 +1,4 @@
-namespace Project_PRN232.Models
+﻿namespace Project_PRN232.Models
 {
 	public class ErrorViewModel
 	{

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs
 {
@@ -20,6 +20,6 @@ namespace API.DTOs
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public string? Role { get; set; } // Student, Admin, Provider
+        public string? Role { get; set; }
     }
 }

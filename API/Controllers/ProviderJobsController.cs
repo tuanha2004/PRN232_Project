@@ -11,7 +11,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Provider")] // CHỈ PROVIDER mới được truy cập
+    [Authorize(Roles = "Provider")]
     public class ProviderJobsController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
@@ -21,7 +21,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // Helper: Lấy ProviderId từ token
         private async Task<int?> GetCurrentProviderIdAsync()
         {
             var userEmail = User.Identity?.Name;
@@ -30,7 +29,6 @@ namespace API.Controllers
             return provider?.UserId;
         }
 
-        // GET: api/ProviderJobs - Lấy tất cả jobs của provider đang đăng nhập
         [HttpGet(Name = "GetMyProviderJobs")]
         public async Task<ActionResult> GetMyJobs()
         {
@@ -75,7 +73,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/ProviderJobs/{id} - Lấy chi tiết 1 job với danh sách students
         [HttpGet("{id}", Name = "GetProviderJobDetails")]
         public async Task<ActionResult> GetJobDetails(int id)
         {
@@ -147,7 +144,6 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/ProviderJobs - Tạo job mới
         [HttpPost(Name = "CreateProviderJob")]
         public async Task<ActionResult<object>> CreateJob([FromBody] CreateJobRequest request)
         {
@@ -173,7 +169,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Validate dates
                 if (request.StartDate.HasValue && request.EndDate.HasValue)
                 {
                     if (request.EndDate < request.StartDate)
@@ -197,7 +192,7 @@ namespace API.Controllers
                     ProviderId = providerId.Value,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Status = "Active" // Mặc định là Active
+                    Status = "Active" 
                 };
 
                 _context.Jobs.Add(job);
@@ -231,7 +226,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/ProviderJobs/{id} - Cập nhật job
         [HttpPut("{id}", Name = "UpdateProviderJob")]
         public async Task<IActionResult> UpdateJob(int id, [FromBody] UpdateJobRequest request)
         {
@@ -269,7 +263,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Cập nhật thông tin
                 job.Title = request.Title ?? job.Title;
                 job.Description = request.Description ?? job.Description;
                 job.Location = request.Location ?? job.Location;
@@ -279,7 +272,6 @@ namespace API.Controllers
                 job.Status = request.Status ?? job.Status;
                 job.UpdatedAt = DateTime.Now;
 
-                // Validate dates nếu có thay đổi
                 if (job.StartDate.HasValue && job.EndDate.HasValue)
                 {
                     if (job.EndDate < job.StartDate)
@@ -322,7 +314,6 @@ namespace API.Controllers
             }
         }
 
-        // DELETE: api/ProviderJobs/{id} - Xóa job
         [HttpDelete("{id}", Name = "DeleteProviderJob")]
         public async Task<IActionResult> DeleteJob(int id)
         {
@@ -352,7 +343,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Kiểm tra xem có students đang làm việc không
                 if (job.JobAssignments.Any())
                 {
                     return BadRequest(new
@@ -381,7 +371,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/ProviderJobs/{jobId}/applications - Lấy danh sách applications của 1 job
         [HttpGet("{jobId}/applications", Name = "GetProviderJobApplications")]
         public async Task<ActionResult> GetJobApplications(int jobId)
         {
@@ -397,7 +386,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Kiểm tra job có thuộc về provider không
                 var job = await _context.Jobs
                     .FirstOrDefaultAsync(j => j.JobId == jobId && j.ProviderId == providerId);
 
@@ -441,7 +429,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/ProviderJobs/applications/{applicationId}/status - Accept/Reject application
         [HttpPut("applications/{applicationId}/status", Name = "UpdateProviderApplicationStatus")]
         public async Task<IActionResult> UpdateApplicationStatus(
             int applicationId, 
@@ -483,20 +470,17 @@ namespace API.Controllers
                     });
                 }
 
-                // Kiểm tra job có thuộc về provider không
                 if (application.Job?.ProviderId != providerId)
                 {
                     return Forbid();
                 }
 
-                // Cập nhật status
                 var oldStatus = application.Status;
                 application.Status = request.Status;
 
-                // Nếu approve thì tạo JobAssignment
                 if (request.Status == "Approved" && oldStatus != "Approved")
                 {
-                    // Kiểm tra xem đã có assignment chưa
+
                     var existingAssignment = await _context.JobAssignments
                         .FirstOrDefaultAsync(ja => ja.StudentId == application.StudentId 
                                                 && ja.JobId == application.JobId);
@@ -514,7 +498,6 @@ namespace API.Controllers
                     }
                 }
 
-                // Nếu reject thì xóa JobAssignment (nếu có)
                 if (request.Status == "Rejected" && oldStatus == "Approved")
                 {
                     var assignment = await _context.JobAssignments
@@ -552,7 +535,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/ProviderJobs/statistics - Thống kê jobs của provider
         [HttpGet("statistics", Name = "GetProviderStatistics")]
         public async Task<ActionResult<object>> GetStatistics()
         {

@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Project_PRN232.Models.DTOs;
@@ -27,7 +27,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Lấy tất cả jobs của provider
         public async Task<List<JobDto>?> GetMyJobsAsync()
         {
             try
@@ -55,7 +54,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Lấy chi tiết job
         public async Task<JobDto?> GetJobDetailsAsync(int id)
         {
             try
@@ -83,7 +81,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // POST: Tạo job mới
         public async Task<(bool Success, string Message, JobDto? Job)> CreateJobAsync(CreateJobDto request)
         {
             try
@@ -119,7 +116,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // PUT: Cập nhật job
         public async Task<(bool Success, string Message)> UpdateJobAsync(int id, UpdateJobDto request)
         {
             try
@@ -155,7 +151,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // DELETE: Xóa job
         public async Task<(bool Success, string Message)> DeleteJobAsync(int id)
         {
             try
@@ -189,7 +184,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Lấy applications của job
         public async Task<List<ApplicationDto>?> GetJobApplicationsAsync(int jobId)
         {
             try
@@ -217,7 +211,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // PUT: Accept/Reject application
         public async Task<(bool Success, string Message)> UpdateApplicationStatusAsync(int applicationId, string status)
         {
             try
@@ -253,7 +246,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Thống kê
         public async Task<ProviderStatisticsDto?> GetStatisticsAsync()
         {
             try
@@ -282,7 +274,6 @@ namespace Project_PRN232.Services
         }
     }
 
-    // DTOs cho ProviderService
     public class CreateJobDto
     {
         public string Title { get; set; } = string.Empty;

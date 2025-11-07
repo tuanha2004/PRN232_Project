@@ -1,4 +1,4 @@
-namespace Project_PRN232.Models.DTOs
+﻿namespace Project_PRN232.Models.DTOs
 {
     public class CheckinRecordResponse
     {

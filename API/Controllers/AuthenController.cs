@@ -106,7 +106,7 @@ namespace API.Controllers
 
 			try
 			{
-				// Kiểm tra email đã tồn tại chưa
+
 				var existingUser = await _context.Users
 					.FirstOrDefaultAsync(u => u.Email == request.Email);
 
@@ -115,14 +115,13 @@ namespace API.Controllers
 					return BadRequest(new { message = "Email đã được đăng ký" });
 				}
 
-				// Tạo user mới
 				var newUser = new User
 				{
 					Email = request.Email,
 					FullName = request.FullName,
-					PasswordHash = request.Password, // Plaintext password
+					PasswordHash = request.Password,
 					Phone = request.PhoneNumber,
-					Role = request.Role ?? "Student", // Mặc định là Student
+					Role = request.Role ?? "Student",
 					Status = "Active",
 					CreatedAt = DateTime.Now
 				};
@@ -154,23 +153,16 @@ namespace API.Controllers
 
 				if (user == null)
 				{
-					// Không tiết lộ email có tồn tại hay không (security best practice)
+
 					return Ok(new { message = "Nếu email tồn tại, mã xác nhận đã được gửi đến email của bạn" });
 				}
 
-				// Tạo reset code (6 chữ số)
 				var resetCode = new Random().Next(100000, 999999).ToString();
-				
-				// Lưu reset code vào database (giả sử có trường ResetPasswordCode và ResetPasswordExpiry)
-				// Trong thực tế bạn cần thêm 2 field này vào User model
-				// user.ResetPasswordCode = resetCode;
-				// user.ResetPasswordExpiry = DateTime.Now.AddMinutes(15);
-				// await _context.SaveChangesAsync();
 
-				// TODO: Gửi email với reset code (tạm thời trả về code để test)
+
 				return Ok(new { 
 					message = "Mã xác nhận: " + resetCode + " (Hạn 15 phút)",
-					resetCode = resetCode // Chỉ để test, production phải gửi qua email
+					resetCode = resetCode
 				});
 			}
 			catch (Exception ex)
@@ -198,17 +190,10 @@ namespace API.Controllers
 					return BadRequest(new { message = "Thông tin không hợp lệ" });
 				}
 
-				// TODO: Kiểm tra reset code và expiry time
-				// if (user.ResetPasswordCode != request.ResetCode || 
-				//     user.ResetPasswordExpiry < DateTime.Now)
-				// {
-				//     return BadRequest(new { message = "Mã xác nhận không đúng hoặc đã hết hạn" });
-				// }
 
-				// Cập nhật password mới
 				user.PasswordHash = request.NewPassword;
-				// user.ResetPasswordCode = null;
-				// user.ResetPasswordExpiry = null;
+
+
 				
 				await _context.SaveChangesAsync();
 

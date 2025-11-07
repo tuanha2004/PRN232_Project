@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -26,7 +26,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Lấy tất cả users (không bao gồm Admin)
         public async Task<List<UserDto>?> GetAllUsersAsync()
         {
             try
@@ -54,7 +53,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Lấy thông tin chi tiết 1 user
         public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             try
@@ -82,7 +80,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // POST: Tạo user mới
         public async Task<(bool Success, string Message, UserDto? User)> CreateUserAsync(CreateUserDto request)
         {
             try
@@ -95,7 +92,6 @@ namespace Project_PRN232.Services
                 var response = await _httpClient.PostAsync(apiUrl, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                // Log để debug
                 Console.WriteLine($"Status Code: {response.StatusCode}");
                 Console.WriteLine($"Response Content: {responseContent}");
 
@@ -109,15 +105,15 @@ namespace Project_PRN232.Services
                 }
                 else
                 {
-                    // Parse error response để lấy message chi tiết
+
                     try
                     {
-                        // Kiểm tra xem có phải validation errors không
+
                         var errorDoc = JsonDocument.Parse(responseContent);
                         
                         if (errorDoc.RootElement.TryGetProperty("errors", out var errors))
                         {
-                            // Validation errors từ ModelState
+
                             var errorMessages = new List<string>();
                             foreach (var error in errors.EnumerateObject())
                             {
@@ -130,7 +126,7 @@ namespace Project_PRN232.Services
                         }
                         else
                         {
-                            // Thử parse ApiResponse
+
                             var errorResponse = JsonSerializer.Deserialize<ApiResponse<UserDto>>(responseContent, new JsonSerializerOptions
                             {
                                 PropertyNameCaseInsensitive = true
@@ -140,7 +136,7 @@ namespace Project_PRN232.Services
                     }
                     catch
                     {
-                        // Nếu không parse được, trả về raw content
+
                         return (false, $"Lỗi từ server: {responseContent}", null);
                     }
                 }
@@ -151,7 +147,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // PUT: Cập nhật user
         public async Task<(bool Success, string Message)> UpdateUserAsync(int id, UpdateUserDto request)
         {
             try
@@ -164,7 +159,6 @@ namespace Project_PRN232.Services
                 var response = await _httpClient.PutAsync(apiUrl, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                // Log để debug
                 Console.WriteLine($"Update Status Code: {response.StatusCode}");
                 Console.WriteLine($"Update Response: {responseContent}");
 
@@ -178,15 +172,15 @@ namespace Project_PRN232.Services
                 }
                 else
                 {
-                    // Parse error response để lấy message chi tiết
+
                     try
                     {
-                        // Kiểm tra xem có phải validation errors không
+
                         var errorDoc = JsonDocument.Parse(responseContent);
                         
                         if (errorDoc.RootElement.TryGetProperty("errors", out var errors))
                         {
-                            // Validation errors từ ModelState
+
                             var errorMessages = new List<string>();
                             foreach (var error in errors.EnumerateObject())
                             {
@@ -199,7 +193,7 @@ namespace Project_PRN232.Services
                         }
                         else
                         {
-                            // Thử parse ApiResponse
+
                             var errorResponse = JsonSerializer.Deserialize<ApiResponse<UserDto>>(responseContent, new JsonSerializerOptions
                             {
                                 PropertyNameCaseInsensitive = true
@@ -209,7 +203,7 @@ namespace Project_PRN232.Services
                     }
                     catch
                     {
-                        // Nếu không parse được, trả về raw content
+
                         return (false, $"Lỗi từ server: {responseContent}");
                     }
                 }
@@ -220,7 +214,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // DELETE: Xóa user
         public async Task<(bool Success, string Message)> DeleteUserAsync(int id)
         {
             try
@@ -254,7 +247,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // PUT: Reset mật khẩu user về mặc định
         public async Task<(bool Success, string Message)> ResetUserPasswordAsync(int id)
         {
             try
@@ -289,7 +281,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // PUT: Toggle status user
         public async Task<(bool Success, string Message)> ToggleUserStatusAsync(int id)
         {
             try
@@ -324,7 +315,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // GET: Thống kê users
         public async Task<UserStatisticsDto?> GetUserStatisticsAsync()
         {
             try
@@ -353,7 +343,6 @@ namespace Project_PRN232.Services
         }
     }
 
-    // DTOs
     public class UserDto
     {
         public int UserId { get; set; }

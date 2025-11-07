@@ -10,7 +10,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")] // CHỈ ADMIN mới được truy cập toàn bộ controller này
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
@@ -20,7 +20,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/Admin/users - Lấy tất cả users (không bao gồm Admin)
         [HttpGet("users")]
         [EnableQuery(MaxTop = 100, AllowedQueryOptions = AllowedQueryOptions.All)]
         public async Task<ActionResult<IEnumerable<User>>> GetAllNonAdminUsers()
@@ -28,7 +27,7 @@ namespace API.Controllers
             try
             {
                 var users = _context.Users
-                    .Where(u => u.Role != "Admin") // Chỉ lấy users không phải Admin
+                    .Where(u => u.Role != "Admin")
                     .AsQueryable();
 
                 return Ok(users);
@@ -43,7 +42,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Admin/users/{id} - Lấy thông tin chi tiết 1 user (không phải Admin)
         [HttpGet("users/{id}")]
         [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.Select | AllowedQueryOptions.Expand)]
         public async Task<ActionResult<User>> GetUserById(int id)
@@ -75,7 +73,6 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/Admin/users - Tạo user mới (chỉ tạo User, không tạo Admin)
         [HttpPost("users")]
         public async Task<ActionResult<object>> CreateUser([FromBody] CreateUserRequest request)
         {
@@ -91,7 +88,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép tạo Admin
                 if (request.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -101,7 +97,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Kiểm tra email đã tồn tại
                 if (await _context.Users.AnyAsync(u => u.Email == request.Email))
                 {
                     return BadRequest(new
@@ -115,7 +110,7 @@ namespace API.Controllers
                 {
                     FullName = request.FullName,
                     Email = request.Email,
-                    PasswordHash = request.Password, // TODO: Hash password trong production
+                    PasswordHash = request.Password,
                     Role = string.IsNullOrEmpty(request.Role) ? "User" : request.Role,
                     Phone = request.Phone,
                     Address = request.Address,
@@ -154,7 +149,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Admin/users/{id} - Cập nhật thông tin user
         [HttpPut("users/{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
         {
@@ -180,7 +174,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép cập nhật Admin
                 if (user.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -190,7 +183,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép đổi role thành Admin
                 if (request.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -200,7 +192,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Cập nhật thông tin
                 user.FullName = request.FullName ?? user.FullName;
                 user.Phone = request.Phone ?? user.Phone;
                 user.Address = request.Address ?? user.Address;
@@ -237,7 +228,6 @@ namespace API.Controllers
             }
         }
 
-        // DELETE: api/Admin/users/{id} - Xóa user
         [HttpDelete("users/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -253,7 +243,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép xóa Admin
                 if (user.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -282,7 +271,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Admin/users/{id}/reset-password - Admin reset mật khẩu cho user về mặc định
         [HttpPut("users/{id}/reset-password")]
         public async Task<IActionResult> ResetUserPassword(int id)
         {
@@ -298,7 +286,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép reset mật khẩu Admin
                 if (user.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -308,8 +295,7 @@ namespace API.Controllers
                     });
                 }
 
-                // Reset mật khẩu về mặc định: 123456789
-                user.PasswordHash = "123456789"; // TODO: Hash password trong production
+                user.PasswordHash = "123456789";
                 user.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
@@ -329,7 +315,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Admin/users/{id}/toggle-status - Kích hoạt/Vô hiệu hóa tài khoản
         [HttpPut("users/{id}/toggle-status")]
         public async Task<IActionResult> ToggleUserStatus(int id)
         {
@@ -345,7 +330,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Không cho phép thay đổi status Admin
                 if (user.Role?.ToLower() == "admin")
                 {
                     return BadRequest(new
@@ -355,7 +339,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Toggle status
                 user.Status = user.Status == "Active" ? "Inactive" : "Active";
                 user.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
@@ -383,7 +366,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Admin/users/statistics - Thống kê users
         [HttpGet("users/statistics")]
         public async Task<ActionResult<object>> GetUserStatistics()
         {
@@ -415,7 +397,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Admin/users/search - Tìm kiếm users với OData
         [HttpGet("users/search")]
         [EnableQuery(MaxTop = 100, AllowedQueryOptions = AllowedQueryOptions.All)]
         public ActionResult<IQueryable<User>> SearchUsers()

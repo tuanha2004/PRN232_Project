@@ -17,7 +17,6 @@ namespace Project_PRN232.Controllers
             _logger = logger;
         }
 
-        // Kiểm tra quyền Provider
         private bool CheckProviderAccess()
         {
             if (!_authService.IsLoggedIn())
@@ -29,7 +28,6 @@ namespace Project_PRN232.Controllers
             return userRole == "Provider";
         }
 
-        // GET: ProviderJobs/Index - Dashboard
         public async Task<IActionResult> Index()
         {
             if (!CheckProviderAccess())
@@ -41,14 +39,12 @@ namespace Project_PRN232.Controllers
             ViewBag.UserEmail = _authService.GetUserEmail();
             ViewBag.FullName = _authService.GetFullName();
 
-            // Lấy thống kê
             var statistics = await _providerService.GetStatisticsAsync();
             ViewBag.Statistics = statistics;
 
             return View();
         }
 
-        // GET: ProviderJobs/Jobs - Danh sách jobs
         public async Task<IActionResult> Jobs()
         {
             if (!CheckProviderAccess())
@@ -64,7 +60,6 @@ namespace Project_PRN232.Controllers
             return View(jobs ?? new List<JobDto>());
         }
 
-        // GET: ProviderJobs/Details/5 - Chi tiết job
         public async Task<IActionResult> Details(int id)
         {
             if (!CheckProviderAccess())
@@ -86,7 +81,6 @@ namespace Project_PRN232.Controllers
             return View(job);
         }
 
-        // GET: ProviderJobs/Create
         public IActionResult Create()
         {
             if (!CheckProviderAccess())
@@ -101,7 +95,6 @@ namespace Project_PRN232.Controllers
             return View();
         }
 
-        // POST: ProviderJobs/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateJobDto model)
@@ -131,7 +124,6 @@ namespace Project_PRN232.Controllers
             }
         }
 
-        // GET: ProviderJobs/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             if (!CheckProviderAccess())
@@ -153,7 +145,6 @@ namespace Project_PRN232.Controllers
             return View(job);
         }
 
-        // POST: ProviderJobs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, UpdateJobDto model)
@@ -183,7 +174,6 @@ namespace Project_PRN232.Controllers
             }
         }
 
-        // POST: ProviderJobs/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -197,7 +187,6 @@ namespace Project_PRN232.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        // GET: ProviderJobs/Applications/5 - Xem applications của job
         public async Task<IActionResult> Applications(int id)
         {
             if (!CheckProviderAccess())
@@ -222,7 +211,6 @@ namespace Project_PRN232.Controllers
             return View(applications ?? new List<ApplicationDto>());
         }
 
-        // POST: ProviderJobs/ApproveApplication/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveApplication(int id)
@@ -236,7 +224,6 @@ namespace Project_PRN232.Controllers
             return Json(new { success = result.Success, message = result.Message });
         }
 
-        // POST: ProviderJobs/RejectApplication/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectApplication(int id)

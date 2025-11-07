@@ -1,4 +1,4 @@
-namespace Project_PRN232.Models.DTOs
+﻿namespace Project_PRN232.Models.DTOs
 {
     public class ApplicationDto
     {
@@ -11,12 +11,10 @@ namespace Project_PRN232.Models.DTOs
         public string? StudentYear { get; set; }
         public string? WorkType { get; set; }
         public string? Notes { get; set; }
-        
-        // Additional properties for ProviderJobs views
+
         public string? StudentName { get; set; }
         public string? StudentEmail { get; set; }
 
-        // Job info
         public JobDto? Job { get; set; }
     }
 }

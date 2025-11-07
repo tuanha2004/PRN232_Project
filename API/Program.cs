@@ -10,8 +10,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// ---- JWT ----
 builder.Services.AddAuthentication(options =>
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,27 +32,23 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<JwtService>();
-// ---- -------
 
-// ------ DI-----
+
 builder.Services.AddDbContext<ProjectPrn232Context>(option
 	=> option.UseSqlServer(builder.Configuration
 	.GetConnectionString("MyCnn")));
 
 builder.Services.AddScoped(typeof(ProjectPrn232Context));
 
-// Configure OData
 var modelBuilder = new ODataConventionModelBuilder();
-//modelBuilder.EntitySet<Account>("Accounts");
+
 modelBuilder.EntitySet<User>("Users");
-// modelBuilder.EntitySet<Job>("Jobs"); // ❌ REMOVED - Conflict với JobsController
+
 modelBuilder.EntitySet<Application>("Applications");
 
-// Thêm CheckinRecord với key explicitly
 var checkinRecordEntity = modelBuilder.EntitySet<CheckinRecord>("CheckinRecords");
 checkinRecordEntity.EntityType.HasKey(c => c.CheckinId);
 
-// Add Controllers with OData (chỉ gọi 1 lần)
 builder.Services.AddControllers()
 	.AddOData(opt => opt
 		.AddRouteComponents("api", modelBuilder.GetEdmModel())
@@ -78,12 +72,11 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
-// ---- JWT ----
-// 2. Kích hoạt middleware Authentication và Authorization
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-//
+
 
 if (app.Environment.IsDevelopment())
 {

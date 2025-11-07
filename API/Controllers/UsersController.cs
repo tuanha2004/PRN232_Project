@@ -1,4 +1,4 @@
-using API.DTOs.Users;
+﻿using API.DTOs.Users;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Yêu cầu đăng nhập
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
@@ -18,7 +18,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // GET: api/Users - CHỈ ADMIN xem tất cả users
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllUsers()
@@ -36,7 +35,7 @@ namespace API.Controllers
                         u.Address,
                         u.Status,
                         u.CreatedAt,
-                        // Không trả về PasswordHash
+
                     })
                     .ToListAsync();
 
@@ -48,7 +47,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Users/5 - Admin xem user bất kỳ, User xem chính mình
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetUser(int id)
         {
@@ -58,7 +56,6 @@ namespace API.Controllers
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
 
-                // User chỉ xem được thông tin của mình, Admin xem được tất cả
                 if (userRole != "Admin" && currentUser?.UserId != id)
                 {
                     return Forbid();
@@ -90,7 +87,6 @@ namespace API.Controllers
             }
         }
 
-        // GET: api/Users/me - Lấy thông tin user đang đăng nhập
         [HttpGet("me")]
         [Authorize(Roles = "Student,Admin")]
         public async Task<ActionResult<object>> GetCurrentUser()
@@ -123,7 +119,6 @@ namespace API.Controllers
             }
         }
 
-        // POST: api/Users - CHỈ ADMIN tạo user mới
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserRequest request)
@@ -139,7 +134,6 @@ namespace API.Controllers
                     });
                 }
 
-                // Kiểm tra email đã tồn tại
                 if (await _context.Users.AnyAsync(u => u.Email == request.Email))
                 {
                     return BadRequest(new { Message = "Email đã tồn tại" });
@@ -178,7 +172,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Users/5 - Admin cập nhật user bất kỳ, User cập nhật chính mình
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
         {
@@ -197,7 +190,6 @@ namespace API.Controllers
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
 
-                // User chỉ cập nhật được thông tin của mình, Admin cập nhật được tất cả
                 if (userRole != "Admin" && currentUser?.UserId != id)
                 {
                     return Forbid();
@@ -209,13 +201,11 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy user" });
                 }
 
-                // Cập nhật thông tin
                 user.FullName = request.FullName ?? user.FullName;
                 user.Phone = request.Phone ?? user.Phone;
                 user.Address = request.Address ?? user.Address;
                 user.UpdatedAt = DateTime.Now;
 
-                // Chỉ Admin mới được đổi Role và Status
                 if (userRole == "Admin")
                 {
                     user.Role = request.Role ?? user.Role;
@@ -241,7 +231,6 @@ namespace API.Controllers
             }
         }
 
-        // DELETE: api/Users/5 - CHỈ ADMIN xóa user
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(int id)
@@ -265,7 +254,6 @@ namespace API.Controllers
             }
         }
 
-        // PUT: api/Users/5/change-password - Đổi mật khẩu
         [HttpPut("{id}/change-password")]
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest request)
         {
@@ -284,7 +272,6 @@ namespace API.Controllers
                 var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
                 var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
 
-                // User chỉ đổi được mật khẩu của mình, Admin đổi được tất cả
                 if (userRole != "Admin" && currentUser?.UserId != id)
                 {
                     return Forbid();
@@ -296,7 +283,6 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy user" });
                 }
 
-                // Kiểm tra mật khẩu cũ (nếu không phải Admin)
                 if (userRole != "Admin")
                 {
                     if (string.IsNullOrEmpty(request.OldPassword))
@@ -310,7 +296,7 @@ namespace API.Controllers
                     }
                 }
 
-                user.PasswordHash = request.NewPassword; // TODO: Hash password trong production
+                user.PasswordHash = request.NewPassword;
                 user.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 

@@ -1,4 +1,4 @@
-namespace API.DTOs.CheckinRecords
+﻿namespace API.DTOs.CheckinRecords
 {
     public class CheckinRecordResponse
     {
@@ -9,7 +9,7 @@ namespace API.DTOs.CheckinRecords
         public string JobTitle { get; set; } = string.Empty;
         public DateTime? CheckinTime { get; set; }
         public DateTime? CheckoutTime { get; set; }
-        public string Status { get; set; } = string.Empty; // "Checked In", "Checked Out"
-        public double? WorkedHours { get; set; } // Số giờ làm việc
+        public string Status { get; set; } = string.Empty;
+        public double? WorkedHours { get; set; }
     }
 }

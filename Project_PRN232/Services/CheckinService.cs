@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Project_PRN232.Models.DTOs;
 
@@ -21,7 +21,6 @@ namespace Project_PRN232.Services
             return _httpContextAccessor.HttpContext?.Session.GetString("JwtToken");
         }
 
-        // Lấy tất cả checkin records của sinh viên
         public async Task<List<CheckinRecordResponse>> GetMyCheckinRecordsAsync()
         {
             var token = GetToken();
@@ -44,7 +43,6 @@ namespace Project_PRN232.Services
             return records ?? new List<CheckinRecordResponse>();
         }
 
-        // Lấy checkin hiện tại (chưa checkout)
         public async Task<CheckinRecordResponse?> GetCurrentCheckinAsync()
         {
             var token = GetToken();
@@ -67,7 +65,6 @@ namespace Project_PRN232.Services
             return record;
         }
 
-        // Check-in
         public async Task<(bool Success, string Message, CheckinRecordResponse? Record)> CheckinAsync(int jobId)
         {
             var token = GetToken();
@@ -117,7 +114,6 @@ namespace Project_PRN232.Services
             }
         }
 
-        // Check-out
         public async Task<(bool Success, string Message, CheckinRecordResponse? Record)> CheckoutAsync(int checkinId)
         {
             var token = GetToken();

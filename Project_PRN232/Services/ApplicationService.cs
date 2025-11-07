@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Project_PRN232.Models.DTOs;
@@ -40,7 +40,7 @@ namespace Project_PRN232.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Parse response để lấy message
+
                     try
                     {
                         var successResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
@@ -56,7 +56,7 @@ namespace Project_PRN232.Services
                 }
                 else
                 {
-                    // Kiểm tra xem response có phải JSON không
+
                     try
                     {
                         var errorResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
@@ -67,7 +67,7 @@ namespace Project_PRN232.Services
                     }
                     catch
                     {
-                        // Nếu không phải JSON, có thể là HTML (redirect to login)
+
                         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                         {
                             return (false, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");

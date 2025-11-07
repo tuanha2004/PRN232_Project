@@ -19,7 +19,6 @@ namespace API.Controllers
             _context = context;
         }
 
-        // Helper method to get current provider ID from JWT token
         private async Task<int?> GetCurrentProviderIdAsync()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -34,14 +33,10 @@ namespace API.Controllers
                 return null;
             }
 
-            // Provider ID chính là User ID vì Provider là User với Role = "Provider"
             return user.UserId;
         }
 
-        /// <summary>
-        /// GET: api/Attendance
-        /// Lấy tất cả checkin records của các students đang làm việc cho provider
-        /// </summary>
+
         [HttpGet]
         public async Task<IActionResult> GetAttendanceRecords()
         {
@@ -51,7 +46,6 @@ namespace API.Controllers
                 return Unauthorized(new { Success = false, Message = "Invalid token" });
             }
 
-            // Lấy checkin records của các jobs thuộc provider này
             var records = await _context.CheckinRecords
                 .Include(c => c.Student)
                 .Include(c => c.Job)
@@ -77,10 +71,7 @@ namespace API.Controllers
             return Ok(records);
         }
 
-        /// <summary>
-        /// GET: api/Attendance/job/{jobId}
-        /// Lấy attendance records của một job cụ thể
-        /// </summary>
+
         [HttpGet("job/{jobId}")]
         public async Task<IActionResult> GetAttendanceByJob(int jobId)
         {
@@ -90,7 +81,6 @@ namespace API.Controllers
                 return Unauthorized(new { Success = false, Message = "Invalid provider token" });
             }
 
-            // Kiểm tra job có thuộc provider này không
             var job = await _context.Jobs.FindAsync(jobId);
             if (job == null)
             {
@@ -132,10 +122,7 @@ namespace API.Controllers
             });
         }
 
-        /// <summary>
-        /// GET: api/Attendance/student/{studentId}
-        /// Lấy attendance records của một student cụ thể (chỉ trong jobs của provider)
-        /// </summary>
+
         [HttpGet("student/{studentId}")]
         public async Task<IActionResult> GetAttendanceByStudent(int studentId)
         {
@@ -176,10 +163,7 @@ namespace API.Controllers
             });
         }
 
-        /// <summary>
-        /// GET: api/Attendance/{id}
-        /// Lấy chi tiết một checkin record
-        /// </summary>
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAttendanceRecord(int id)
         {
@@ -199,7 +183,6 @@ namespace API.Controllers
                 return NotFound(new { Success = false, Message = "Checkin record không tồn tại" });
             }
 
-            // Kiểm tra job có thuộc provider này không
             if (record.Job == null || record.Job.ProviderId != providerId)
             {
                 return Forbid();
@@ -231,10 +214,7 @@ namespace API.Controllers
             });
         }
 
-        /// <summary>
-        /// GET: api/Attendance/statistics
-        /// Lấy thống kê attendance của provider
-        /// </summary>
+
         [HttpGet("statistics")]
         public async Task<IActionResult> GetAttendanceStatistics()
         {
@@ -253,12 +233,10 @@ namespace API.Controllers
             var completedCheckins = allRecords.Count(c => c.CheckoutTime.HasValue);
             var inProgressCheckins = totalCheckins - completedCheckins;
 
-            // Tính tổng giờ làm việc
             var totalWorkHours = allRecords
                 .Where(c => c.CheckinTime.HasValue && c.CheckoutTime.HasValue)
                 .Sum(c => (c.CheckoutTime!.Value - c.CheckinTime!.Value).TotalHours);
 
-            // Lấy checkins trong tháng này
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
             var monthlyCheckins = allRecords
@@ -266,12 +244,11 @@ namespace API.Controllers
                     && c.CheckinTime.Value.Month == currentMonth 
                     && c.CheckinTime.Value.Year == currentYear);
 
-            // Top students theo số lượng checkin
             var topStudentsData = await _context.CheckinRecords
                 .Include(c => c.Student)
                 .Include(c => c.Job)
                 .Where(c => c.Job != null && c.Job.ProviderId == providerId && c.StudentId != null)
-                .ToListAsync(); // ← Load vào memory trước
+                .ToListAsync(); 
 
             var topStudents = topStudentsData
                 .GroupBy(c => new { c.StudentId, StudentName = c.Student?.FullName })
@@ -288,7 +265,7 @@ namespace API.Controllers
                 })
                 .OrderByDescending(s => s.TotalCheckins)
                 .Take(10)
-                .ToList(); // ← Tính toán trong memory
+                .ToList(); 
 
             var statistics = new
             {
@@ -311,10 +288,7 @@ namespace API.Controllers
             });
         }
 
-        /// <summary>
-        /// GET: api/Attendance/summary/daily
-        /// Lấy tổng hợp attendance theo ngày (7 ngày gần nhất)
-        /// </summary>
+
         [HttpGet("summary/daily")]
         public async Task<IActionResult> GetDailySummary()
         {
@@ -332,7 +306,7 @@ namespace API.Controllers
                     && c.Job.ProviderId == providerId
                     && c.CheckinTime.HasValue
                     && c.CheckinTime.Value >= sevenDaysAgo)
-                .ToListAsync(); // ← Load vào memory trước
+                .ToListAsync(); 
 
             var dailySummary = recordsData
                 .GroupBy(c => c.CheckinTime!.Value.Date)
@@ -348,7 +322,7 @@ namespace API.Controllers
                         2)
                 })
                 .OrderByDescending(s => s.Date)
-                .ToList(); // ← Tính toán trong memory
+                .ToList(); 
 
             return Ok(new
             {
