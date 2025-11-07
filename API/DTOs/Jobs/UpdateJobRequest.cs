@@ -20,7 +20,7 @@ namespace API.DTOs.Jobs
 
         public DateOnly? EndDate { get; set; }
 
-        [RegularExpression(@"^(Active|Inactive|Closed)$", ErrorMessage = "Status phải là: Active, Inactive, hoặc Closed")]
+        [RegularExpression(@"^(Open|Closed)$", ErrorMessage = "Status phải là: Open hoặc Closed")]
         public string? Status { get; set; }
     }
 }

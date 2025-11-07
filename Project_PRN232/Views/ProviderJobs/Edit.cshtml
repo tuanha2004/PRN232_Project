@@ -1,4 +1,4 @@
-@model Project_PRN232.Models.DTOs.JobDto
+@model Project_PRN232.Services.UpdateJobDto
 
 @{
     ViewData["Title"] = "Chỉnh Sửa Job";
@@ -20,12 +20,12 @@
                         </div>
                     }
 
-                    <form asp-action="Edit" asp-route-id="@Model.JobId" method="post">
+                    <form asp-action="Edit" asp-route-id="@ViewBag.JobId" method="post">
                         @Html.AntiForgeryToken()
                         
                         <div class="mb-3">
                             <label class="form-label">Job ID</label>
-                            <input type="text" class="form-control" value="@Model.JobId" disabled />
+                            <input type="text" class="form-control" value="@ViewBag.JobId" disabled />
                         </div>
 
                         <div class="mb-3">
@@ -82,7 +82,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

@@ -142,7 +142,24 @@ namespace Project_PRN232.Controllers
                 return RedirectToAction(nameof(Jobs));
             }
 
-            return View(job);
+            // Map JobDto to UpdateJobDto for editing
+            var updateModel = new UpdateJobDto
+            {
+                Title = job.Title,
+                Description = job.Description,
+                Location = job.Location,
+                Salary = job.Salary,
+                StartDate = job.StartDate,
+                EndDate = job.EndDate,
+                Status = job.Status
+            };
+
+            // Store readonly fields in ViewBag
+            ViewBag.JobId = job.JobId;
+            ViewBag.CreatedAt = job.CreatedAt;
+            ViewBag.UpdatedAt = job.UpdatedAt;
+
+            return View(updateModel);
         }
 
         [HttpPost]
@@ -157,6 +174,19 @@ namespace Project_PRN232.Controllers
 
             if (!ModelState.IsValid)
             {
+                // Log validation errors
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                TempData["ErrorMessage"] = "Validation failed: " + string.Join(", ", errors);
+                
+                // Restore ViewBag for re-rendering
+                var job = await _providerService.GetJobDetailsAsync(id);
+                if (job != null)
+                {
+                    ViewBag.JobId = job.JobId;
+                    ViewBag.CreatedAt = job.CreatedAt;
+                    ViewBag.UpdatedAt = job.UpdatedAt;
+                }
+                
                 return View(model);
             }
 
@@ -170,6 +200,16 @@ namespace Project_PRN232.Controllers
             else
             {
                 TempData["ErrorMessage"] = result.Message;
+                
+                // Restore ViewBag for re-rendering
+                var job = await _providerService.GetJobDetailsAsync(id);
+                if (job != null)
+                {
+                    ViewBag.JobId = job.JobId;
+                    ViewBag.CreatedAt = job.CreatedAt;
+                    ViewBag.UpdatedAt = job.UpdatedAt;
+                }
+                
                 return View(model);
             }
         }
