@@ -1,7 +1,8 @@
-@model List<Project_PRN232.Models.DTOs.CheckinRecordResponse>
+@using Project_PRN232.DTOs
+@model List<CheckinRecordResponse>
 @{
     ViewData["Title"] = "Check-in / Check-out";
-    var currentCheckin = ViewBag.CurrentCheckin as Project_PRN232.Models.DTOs.CheckinRecordResponse;
+    var currentCheckin = ViewBag.CurrentCheckin as CheckinRecordResponse;
 }
 
 <div class="container mt-4">

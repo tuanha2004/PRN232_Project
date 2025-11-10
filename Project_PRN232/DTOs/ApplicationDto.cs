@@ -1,4 +1,4 @@
-﻿namespace Project_PRN232.Models.DTOs
+﻿namespace Project_PRN232.DTOs
 {
     public class ApplicationDto
     {

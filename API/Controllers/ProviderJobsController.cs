@@ -108,15 +108,21 @@ namespace API.Controllers
                             a.StudentId,
                             StudentName = a.Student != null ? a.Student.FullName : null,
                             StudentEmail = a.Student != null ? a.Student.Email : null,
+                            StudentPhone = a.Student != null ? a.Student.Phone : null,
                             a.Status,
-                            a.AppliedAt
+                            a.AppliedAt,
+                            a.WorkType,
+                            a.StudentYear,
+                            a.Phone,
+                            a.Notes
                         }).ToList(),
-                        Assignments = j.JobAssignments.Select(ja => new
+                        JobAssignments = j.JobAssignments.Select(ja => new
                         {
                             ja.AssignmentId,
                             ja.StudentId,
                             StudentName = ja.Student != null ? ja.Student.FullName : null,
                             StudentEmail = ja.Student != null ? ja.Student.Email : null,
+                            StudentPhone = ja.Student != null ? ja.Student.Phone : null,
                             ja.AssignedAt,
                             ja.Status
                         }).ToList()
@@ -348,17 +354,18 @@ namespace API.Controllers
                     return BadRequest(new
                     {
                         Success = false,
-                        Message = "Không thể xóa job đang có students được phân công"
+                        Message = "Không thể xóa công việc đang có students được phân công"
                     });
                 }
 
-                _context.Jobs.Remove(job);
+                job.Status = "Inactive";
+                job.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
                 return Ok(new
                 {
                     Success = true,
-                    Message = "Xóa job thành công"
+                    Message = "Xóa công việc thành công"
                 });
             }
             catch (Exception ex)
@@ -579,6 +586,76 @@ namespace API.Controllers
                         PendingApplications = pendingApplications,
                         TotalAssignedStudents = totalAssignedStudents
                     }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = $"Lỗi server: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpDelete("{jobId}/assignments/{studentId}", Name = "RemoveStudentFromJob")]
+        public async Task<IActionResult> RemoveStudentFromJob(int jobId, int studentId)
+        {
+            try
+            {
+                var providerId = await GetCurrentProviderIdAsync();
+                if (providerId == null)
+                {
+                    return Unauthorized(new
+                    {
+                        Success = false,
+                        Message = "Không tìm thấy thông tin Provider"
+                    });
+                }
+
+                var job = await _context.Jobs
+                    .FirstOrDefaultAsync(j => j.JobId == jobId && j.ProviderId == providerId);
+
+                if (job == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "Không tìm thấy job hoặc bạn không có quyền truy cập"
+                    });
+                }
+
+                var assignment = await _context.JobAssignments
+                    .Include(ja => ja.Student)
+                    .FirstOrDefaultAsync(ja => ja.JobId == jobId && ja.StudentId == studentId);
+
+                if (assignment == null)
+                {
+                    return NotFound(new
+                    {
+                        Success = false,
+                        Message = "Không tìm thấy nhân viên được phân công cho job này"
+                    });
+                }
+
+                var studentName = assignment.Student?.FullName;
+
+                _context.JobAssignments.Remove(assignment);
+
+                var application = await _context.Applications
+                    .FirstOrDefaultAsync(a => a.JobId == jobId && a.StudentId == studentId);
+
+                if (application != null && application.Status == "Approved")
+                {
+                    application.Status = "Rejected";
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = $"Đã hủy phân công nhân viên {studentName} khỏi job thành công"
                 });
             }
             catch (Exception ex)

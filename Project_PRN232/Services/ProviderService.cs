@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Project_PRN232.Models.DTOs;
+using Project_PRN232.DTOs;
 
 namespace Project_PRN232.Services
 {
@@ -272,39 +272,38 @@ namespace Project_PRN232.Services
                 return null;
             }
         }
-    }
 
-    public class CreateJobDto
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Location { get; set; } = string.Empty;
-        public decimal? Salary { get; set; }
-        public DateOnly? StartDate { get; set; }
-        public DateOnly? EndDate { get; set; }
-    }
+        public async Task<(bool Success, string Message)> RemoveStudentFromJobAsync(int jobId, int studentId)
+        {
+            try
+            {
+                SetAuthorizationHeader();
+                var apiUrl = _configuration["ApiSettings:BaseUrl"] + $"/api/ProviderJobs/{jobId}/assignments/{studentId}";
 
-    public class UpdateJobDto
-    {
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? Location { get; set; }
-        public decimal? Salary { get; set; }
-        public DateOnly? StartDate { get; set; }
-        public DateOnly? EndDate { get; set; }
-        public string? Status { get; set; }
-    }
+                var response = await _httpClient.DeleteAsync(apiUrl);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-    public class ProviderStatisticsDto
-    {
-        public int TotalJobs { get; set; }
-        // Backwards-compatible: keep ActiveJobs but prefer OpenJobs
-        public int ActiveJobs { get; set; }
-        // New property matching API: number of jobs with status "Open"
-        public int OpenJobs { get; set; }
-        public int ClosedJobs { get; set; }
-        public int TotalApplications { get; set; }
-        public int PendingApplications { get; set; }
-        public int TotalAssignedStudents { get; set; }
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonSerializer.Deserialize<ApiResponse<object>>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return (true, result?.Message ?? "Hủy phân công nhân viên thành công");
+                }
+                else
+                {
+                    var errorResponse = JsonSerializer.Deserialize<ApiResponse<object>>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return (false, errorResponse?.Message ?? "Hủy phân công nhân viên thất bại");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi kết nối: {ex.Message}");
+            }
+        }
     }
 }

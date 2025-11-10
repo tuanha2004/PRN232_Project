@@ -1,8 +1,11 @@
-@model Project_PRN232.Models.DTOs.JobDto
+@using Project_PRN232.DTOs
+@model JobDto
 
 @{
     ViewData["Title"] = "Chi Tiết Job";
 }
+
+@Html.AntiForgeryToken()
 
 <div class="container mt-4">
     <div class="row mb-4">
@@ -87,6 +90,7 @@
                                 <th>Phone</th>
                                 <th>Ngày Phân Công</th>
                                 <th>Trạng Thái</th>
+                                <th>Thao Tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,6 +102,13 @@
                                     <td>@assignment.StudentPhone</td>
                                     <td>@assignment.AssignedAt?.ToString("dd/MM/yyyy")</td>
                                     <td><span class="badge bg-success">@assignment.Status</span></td>
+                                    <td>
+                                        <button type="button" 
+                                                class="btn btn-danger btn-sm"
+                                                onclick="removeStudent(@Model.JobId, @assignment.StudentId, '@assignment.StudentName')">
+                                            <i class="bi bi-x-circle"></i> Hủy Phân Công
+                                        </button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -161,3 +172,32 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        function removeStudent(jobId, studentId, studentName) {
+            if (confirm(`Bạn có chắc chắn muốn hủy phân công nhân viên "${studentName}" khỏi job này không?`)) {
+                $.ajax({
+                    url: '@Url.Action("RemoveStudentFromJob", "ProviderJobs")',
+                    type: 'POST',
+                    data: {
+                        jobId: jobId,
+                        studentId: studentId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Có lỗi xảy ra khi hủy phân công: ' + error);
+                    }
+                });
+            }
+        }
+    </script>
+}

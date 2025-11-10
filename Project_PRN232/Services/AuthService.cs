@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Project_PRN232.Models.DTOs;
+using Project_PRN232.DTOs;
 
 namespace Project_PRN232.Services
 {

@@ -1,5 +1,6 @@
-﻿@model List<Project_PRN232.Models.DTOs.JobDto>
+﻿@model List<JobDto>
 @using Microsoft.AspNetCore.Http
+@using Project_PRN232.DTOs
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewData["Title"] = "Danh sách công việc";
@@ -344,31 +345,7 @@
             </a>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">Tài khoản Demo</h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Admin Account</h6>
-                                <p class="card-text mb-1"><strong>Email:</strong> admin@@example.com</p>
-                                <p class="card-text"><strong>Password:</strong> admin123</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">User Account</h6>
-                                <p class="card-text mb-1"><strong>Email:</strong> user@@"example.com</p>
-                                <p class="card-text"><strong>Password:</strong> user123</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Demo accounts block removed -->
     }
 
     <div class="row mt-5">

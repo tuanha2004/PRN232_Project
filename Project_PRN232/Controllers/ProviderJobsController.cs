@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Project_PRN232.Services;
-using Project_PRN232.Models.DTOs;
+using Project_PRN232.DTOs;
 
 namespace Project_PRN232.Controllers
 {
@@ -142,7 +142,6 @@ namespace Project_PRN232.Controllers
                 return RedirectToAction(nameof(Jobs));
             }
 
-            // Map JobDto to UpdateJobDto for editing
             var updateModel = new UpdateJobDto
             {
                 Title = job.Title,
@@ -154,7 +153,6 @@ namespace Project_PRN232.Controllers
                 Status = job.Status
             };
 
-            // Store readonly fields in ViewBag
             ViewBag.JobId = job.JobId;
             ViewBag.CreatedAt = job.CreatedAt;
             ViewBag.UpdatedAt = job.UpdatedAt;
@@ -174,11 +172,9 @@ namespace Project_PRN232.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Log validation errors
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 TempData["ErrorMessage"] = "Validation failed: " + string.Join(", ", errors);
                 
-                // Restore ViewBag for re-rendering
                 var job = await _providerService.GetJobDetailsAsync(id);
                 if (job != null)
                 {
@@ -201,7 +197,6 @@ namespace Project_PRN232.Controllers
             {
                 TempData["ErrorMessage"] = result.Message;
                 
-                // Restore ViewBag for re-rendering
                 var job = await _providerService.GetJobDetailsAsync(id);
                 if (job != null)
                 {
@@ -274,6 +269,19 @@ namespace Project_PRN232.Controllers
             }
 
             var result = await _providerService.UpdateApplicationStatusAsync(id, "Rejected");
+            return Json(new { success = result.Success, message = result.Message });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveStudentFromJob(int jobId, int studentId)
+        {
+            if (!CheckProviderAccess())
+            {
+                return Json(new { success = false, message = "Bạn không có quyền thực hiện thao tác này!" });
+            }
+
+            var result = await _providerService.RemoveStudentFromJobAsync(jobId, studentId);
             return Json(new { success = result.Success, message = result.Message });
         }
     }
