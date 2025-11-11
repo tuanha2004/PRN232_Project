@@ -204,35 +204,5 @@ namespace API.Controllers
 				return StatusCode(500, new { message = $"Lỗi server: {ex.Message}" });
 			}
 		}
-
-		[HttpGet("validate")]
-		[Authorize]
-		public ActionResult ValidateToken()
-		{
-			var userEmail = User.Identity?.Name;
-			var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
-
-			return Ok(new
-			{
-				Success = true,
-				Message = "Token hợp lệ",
-				Email = userEmail,
-				Role = userRole
-			});
-		}
-
-		[HttpGet("admin-only")]
-		[Authorize(Roles = "Admin")]
-		public ActionResult AdminOnly()
-		{
-			return Ok(new { Message = "Chỉ Admin mới được truy cập" });
-		}
-
-		[HttpGet("user-or-admin")]
-		[Authorize(Roles = "User,Admin")]
-		public ActionResult UserOrAdmin()
-		{
-			return Ok(new { Message = "User hoặc Admin có thể truy cập" });
-		}
 	}
 }

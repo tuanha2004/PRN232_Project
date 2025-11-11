@@ -2,7 +2,7 @@
 @model List<CheckinRecordResponse>
 @{
     ViewData["Title"] = "Check-in / Check-out";
-    var currentCheckin = ViewBag.CurrentCheckin as CheckinRecordResponse;
+    var currentCheckins = ViewBag.CurrentCheckins as List<CheckinRecordResponse>;
 }
 
 <div class="container mt-4">
@@ -28,8 +28,7 @@
                 </div>
             }
 
-            <!-- Current Check-in Status -->
-            @if (currentCheckin != null)
+            @if (currentCheckins != null && currentCheckins.Any())
             {
                 <div class="card border-success mb-4">
                     <div class="card-header bg-success text-white">
@@ -38,20 +37,23 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="card-title">@currentCheckin.JobTitle</h5>
-                                <p class="mb-0">
-                                    <strong><i class="fas fa-calendar-check me-2"></i>Check-in lúc:</strong> 
-                                    <span class="text-success fw-bold">@currentCheckin.CheckinTime?.ToString("dd/MM/yyyy HH:mm")</span>
-                                </p>
+                        @foreach (var checkin in currentCheckins)
+                        {
+                            <div class="row align-items-center mb-3 pb-3 @(checkin != currentCheckins.Last() ? "border-bottom" : "")">
+                                <div class="col-md-8">
+                                    <h5 class="card-title">@checkin.JobTitle</h5>
+                                    <p class="mb-0">
+                                        <strong><i class="fas fa-calendar-check me-2"></i>Check-in lúc:</strong> 
+                                        <span class="text-success fw-bold">@checkin.CheckinTime?.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button type="button" class="btn btn-danger btn-lg" onclick="checkout(@checkin.CheckinId)">
+                                        <i class="fas fa-sign-out-alt"></i> Check-out
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-end">
-                                <button type="button" class="btn btn-danger btn-lg" onclick="checkout(@currentCheckin.CheckinId)">
-                                    <i class="fas fa-sign-out-alt"></i> Check-out
-                                </button>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
             }

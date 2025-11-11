@@ -57,12 +57,34 @@ namespace Project_PRN232.Services
                 return null;
 
             var content = await response.Content.ReadAsStringAsync();
-            var record = JsonSerializer.Deserialize<CheckinRecordResponse>(content, new JsonSerializerOptions
+            var records = JsonSerializer.Deserialize<List<CheckinRecordResponse>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            return record;
+            return records?.FirstOrDefault();
+        }
+
+        public async Task<List<CheckinRecordResponse>?> GetAllCurrentCheckinsAsync()
+        {
+            var token = GetToken();
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync($"{ApiBaseUrl}/api/CheckinRecords/current");
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var content = await response.Content.ReadAsStringAsync();
+            var records = JsonSerializer.Deserialize<List<CheckinRecordResponse>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return records;
         }
 
         public async Task<(bool Success, string Message, CheckinRecordResponse? Record)> CheckinAsync(int jobId)

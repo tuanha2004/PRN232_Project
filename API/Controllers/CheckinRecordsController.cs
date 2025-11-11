@@ -60,7 +60,7 @@ namespace API.Controllers
 
         [HttpGet("current")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<CheckinRecordResponse>> GetCurrentCheckin()
+        public async Task<ActionResult<IEnumerable<CheckinRecordResponse>>> GetCurrentCheckin()
         {
             var userEmail = User.FindFirst(ClaimTypes.Name)?.Value;
             if (string.IsNullOrEmpty(userEmail))
@@ -74,32 +74,26 @@ namespace API.Controllers
                 return NotFound(new { message = "Người dùng không tồn tại" });
             }
 
-            var currentCheckin = await _context.CheckinRecords
+            var currentCheckins = await _context.CheckinRecords
                 .Include(c => c.Job)
                 .Include(c => c.Student)
                 .Where(c => c.StudentId == user.UserId && c.CheckoutTime == null)
                 .OrderByDescending(c => c.CheckinTime)
-                .FirstOrDefaultAsync();
+                .Select(c => new CheckinRecordResponse
+                {
+                    CheckinId = c.CheckinId,
+                    StudentId = c.StudentId ?? 0,
+                    StudentName = c.Student!.FullName ?? "",
+                    JobId = c.JobId ?? 0,
+                    JobTitle = c.Job!.Title ?? "",
+                    CheckinTime = c.CheckinTime,
+                    CheckoutTime = c.CheckoutTime,
+                    Status = "Checked In",
+                    WorkedHours = null
+                })
+                .ToListAsync();
 
-            if (currentCheckin == null)
-            {
-                return NotFound(new { message = "Không có checkin đang hoạt động" });
-            }
-
-            var response = new CheckinRecordResponse
-            {
-                CheckinId = currentCheckin.CheckinId,
-                StudentId = currentCheckin.StudentId ?? 0,
-                StudentName = currentCheckin.Student!.FullName ?? "",
-                JobId = currentCheckin.JobId ?? 0,
-                JobTitle = currentCheckin.Job!.Title ?? "",
-                CheckinTime = currentCheckin.CheckinTime,
-                CheckoutTime = currentCheckin.CheckoutTime,
-                Status = "Checked In",
-                WorkedHours = null
-            };
-
-            return Ok(response);
+            return Ok(currentCheckins);
         }
 
         [HttpPost("checkin")]
@@ -139,13 +133,18 @@ namespace API.Controllers
                 return NotFound(new { message = "Công việc không tồn tại" });
             }
 
-            var existingCheckin = await _context.CheckinRecords
-                .Where(c => c.StudentId == user.UserId && c.CheckoutTime == null)
+            var today = DateTime.Today;
+
+            var checkinToday = await _context.CheckinRecords
+                .Where(c => c.StudentId == user.UserId 
+                    && c.JobId == request.JobId 
+                    && c.CheckinTime.HasValue
+                    && c.CheckinTime.Value.Date == today)
                 .FirstOrDefaultAsync();
 
-            if (existingCheckin != null)
+            if (checkinToday != null)
             {
-                return BadRequest(new { message = "Bạn đã check-in rồi. Vui lòng check-out trước khi check-in lại." });
+                return BadRequest(new { message = "Bạn đã check-in cho công việc này hôm nay rồi. Mỗi ngày chỉ được check-in 1 lần cho mỗi công việc." });
             }
 
             var application = await _context.Applications

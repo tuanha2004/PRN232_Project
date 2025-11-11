@@ -30,9 +30,9 @@ namespace Project_PRN232.Controllers
             }
 
             var records = await _checkinService.GetMyCheckinRecordsAsync();
-            var currentCheckin = await _checkinService.GetCurrentCheckinAsync();
+            var currentCheckins = await _checkinService.GetAllCurrentCheckinsAsync();
 
-            ViewBag.CurrentCheckin = currentCheckin;
+            ViewBag.CurrentCheckins = currentCheckins;
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
             ViewBag.FullName = HttpContext.Session.GetString("FullName");
 

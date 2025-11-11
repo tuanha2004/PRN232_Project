@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.ModelBuilder;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,13 @@ builder.Services.AddControllers()
 		.OrderBy()
 		.SetMaxTop(100)
 		.Count());
+
+builder.Services.AddControllers()
+	.AddJsonOptions(o =>
+	{
+		o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; // bỏ qua vòng tham chiếu
+		o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+	});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
