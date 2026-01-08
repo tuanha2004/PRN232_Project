@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|d:\\fpt_document\\project_prn232\\prn232_project\\api\\models\\checkinrecord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|solutionrelative:api\\models\\checkinrecord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|d:\\fpt_document\\project_prn232\\prn232_project\\api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|solutionrelative:api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|d:\\fpt_document\\project_prn232\\prn232_project\\api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{857ECC78-F652-4EAC-8AD0-AE24223FBF40}|API\\API.csproj|solutionrelative:api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -42,7 +50,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 521,
-          "SelectedChildIndex": 212,
+          "SelectedChildIndex": 208,
           "Children": [
             {
               "$type": "Bookmark",
@@ -874,7 +882,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\appsettings.json",
+              "RelativeDocumentMoniker": "API\\appsettings.json",
+              "ToolTip": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\appsettings.json",
+              "RelativeToolTip": "API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-08T08:43:03.94Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CheckinRecord.cs",
+              "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Models\\CheckinRecord.cs",
+              "RelativeDocumentMoniker": "API\\Models\\CheckinRecord.cs",
+              "ToolTip": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Models\\CheckinRecord.cs",
+              "RelativeToolTip": "API\\Models\\CheckinRecord.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-08T08:42:46.807Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "AdminController.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "API\\Controllers\\AdminController.cs",
@@ -882,12 +916,11 @@
               "RelativeToolTip": "API\\Controllers\\AdminController.cs",
               "ViewState": "AgIAABEAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-27T14:07:49.47Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T14:07:49.47Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "AuthService.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\Project_PRN232\\Services\\AuthService.cs",
               "RelativeDocumentMoniker": "Project_PRN232\\Services\\AuthService.cs",
@@ -895,12 +928,11 @@
               "RelativeToolTip": "Project_PRN232\\Services\\AuthService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-27T08:33:35.86Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T08:33:35.86Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "AccountController.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\Project_PRN232\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "Project_PRN232\\Controllers\\AccountController.cs",
@@ -912,7 +944,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "Login.cshtml",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\Project_PRN232\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "Project_PRN232\\Views\\Account\\Login.cshtml",
@@ -924,7 +956,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "JwtService.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Services\\JwtService.cs",
               "RelativeDocumentMoniker": "API\\Services\\JwtService.cs",
@@ -932,25 +964,24 @@
               "RelativeToolTip": "API\\Services\\JwtService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-27T05:06:52.145Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T05:06:52.145Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Program.cs",
               "RelativeDocumentMoniker": "API\\Program.cs",
               "ToolTip": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Program.cs",
               "RelativeToolTip": "API\\Program.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAEsAAAA9AAAAAAAAAA==",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAwFwAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-27T05:07:54.836Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "LoginRequest.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\DTOs\\LoginRequest.cs",
               "RelativeDocumentMoniker": "API\\DTOs\\LoginRequest.cs",
@@ -962,7 +993,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "AuthenController.cs",
               "DocumentMoniker": "D:\\FPT_Document\\Project_PRN232\\PRN232_Project\\API\\Controllers\\AuthenController.cs",
               "RelativeDocumentMoniker": "API\\Controllers\\AuthenController.cs",
@@ -970,8 +1001,7 @@
               "RelativeToolTip": "API\\Controllers\\AuthenController.cs",
               "ViewState": "AgIAABkAAAAAAAAAAAAQwD0AAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-26T15:41:11.273Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-26T15:41:11.273Z"
             }
           ]
         },

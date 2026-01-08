@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Models;
 
 public partial class CheckinRecord
 {
+    [Key]
     public int CheckinId { get; set; }
 
     public int? StudentId { get; set; }
