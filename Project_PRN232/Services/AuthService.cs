@@ -168,14 +168,15 @@ namespace Project_PRN232.Services
                 {
                     try
                     {
-                        var result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent, new JsonSerializerOptions
+                        var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseContent, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         });
                         
-                        if (result != null && result.ContainsKey("message"))
+                        if (result != null)
                         {
-                            return (true, result["message"].ToString() ?? "Mã xác nhận đã được gửi");
+                            var message = result.ContainsKey("message") ? result["message"].GetString() : "Mã xác nhận đã được tạo";
+                            return (true, message ?? "Mã xác nhận đã được gửi đến email của bạn");
                         }
                     }
                     catch { }

@@ -1,5 +1,4 @@
-﻿
-using API.Models;
+﻿using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
@@ -11,6 +10,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ====== 1. JWT AUTH ====== dang ki vao DI
 builder.Services.AddAuthentication(options =>
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -31,25 +31,24 @@ builder.Services.AddAuthentication(options =>
 	};
 });
 
-builder.Services.AddAuthorization();
-builder.Services.AddSingleton<JwtService>();
+// ====== 2. Authorization ====== dki vao DI
+builder.Services.AddAuthorization(); 
 
+// ====== 3. Services ======
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
-builder.Services.AddDbContext<ProjectPrn232Context>(option
-	=> option.UseSqlServer(builder.Configuration
-	.GetConnectionString("MyCnn")));
+// ====== 4. DbContext ======
+builder.Services.AddDbContext<ProjectPrn232Context>(options =>
+	options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
 
-builder.Services.AddScoped(typeof(ProjectPrn232Context));
-
+// ====== 5. OData Model ======
 var modelBuilder = new ODataConventionModelBuilder();
-
 modelBuilder.EntitySet<User>("Users");
-
 modelBuilder.EntitySet<Application>("Applications");
+modelBuilder.EntitySet<CheckinRecord>("CheckinRecords");
 
-var checkinRecordEntity = modelBuilder.EntitySet<CheckinRecord>("CheckinRecords");
-checkinRecordEntity.EntityType.HasKey(c => c.CheckinId);
-
+// ====== 6. OData ======
 builder.Services.AddControllers()
 	.AddOData(opt => opt
 		.AddRouteComponents("api", modelBuilder.GetEdmModel())
@@ -57,41 +56,43 @@ builder.Services.AddControllers()
 		.Select()
 		.OrderBy()
 		.SetMaxTop(100)
-		.Count());
-
-builder.Services.AddControllers()
+		.Count()
+	)
 	.AddJsonOptions(o =>
 	{
-		o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; // bỏ qua vòng tham chiếu
+		o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 		o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 	});
 
+// ====== 7. Swagger ======
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ====== 8. CORS ====== CHO PHEP DOMAIN (CLIENT) NAO CALL API O SERVER
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAll", policy =>
 	{
-		policy.AllowAnyOrigin()
-			  .AllowAnyMethod()
-			  .AllowAnyHeader();
+		policy.AllowAnyOrigin() // ALLOW ALL DOMAIN (PORT KHAC NHAU) CALL API
+			  .AllowAnyMethod() // ALLOW ALL GET/POST/PUT/UPDATE/...
+			  .AllowAnyHeader(); // ALLOW ALL HEADER (Authorization, Content-Type…)
 	});
 });
+
 var app = builder.Build();
 
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-
+// ====== 9. Middleware pipeline ======
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowAll"); // kich hoat
+
+app.UseAuthentication(); // kICH HOAT AUTHEN VA AUTHOR DA DANG KI O TREN
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();

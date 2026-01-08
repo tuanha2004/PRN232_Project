@@ -20,34 +20,32 @@ namespace API.Controllers
             _context = context;
         }
 
-        [HttpGet("users")]
-        [EnableQuery(MaxTop = 100, AllowedQueryOptions = AllowedQueryOptions.All)]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllNonAdminUsers()
-        {
-            try
-            {
-                var users = _context.Users
-                    .Where(u => u.Role != "Admin")
-                    .AsQueryable();
+        //[HttpGet("users")]
+        //[EnableQuery(MaxTop = 100, AllowedQueryOptions = AllowedQueryOptions.All)]
+        //public async Task<ActionResult<IEnumerable<User>>> GetAllNonAdminUsers()
+        //{
+        //    try
+        //    {
+        //        var users = _context.Users
+        //            .Where(u => u.Role != "Admin")
+        //            .AsQueryable();
 
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    Success = false,
-                    Message = $"Lỗi server: {ex.Message}"
-                });
-            }
-        }
+        //        return Ok(users);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new
+        //        {
+        //            Success = false,
+        //            Message = $"Lỗi server: {ex.Message}"
+        //        });
+        //    }
+        //}
 
         [HttpGet("users/{id}")]
         [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.Select | AllowedQueryOptions.Expand)]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
-            try
-            {
                 var user = await _context.Users
                     .Where(u => u.UserId == id && u.Role != "Admin")
                     .FirstOrDefaultAsync();
@@ -62,22 +60,12 @@ namespace API.Controllers
                 }
 
                 return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    Success = false,
-                    Message = $"Lỗi server: {ex.Message}"
-                });
-            }
         }
 
         [HttpPost("users")]
         public async Task<ActionResult<object>> CreateUser([FromBody] CreateUserRequest request)
         {
-            try
-            {
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(new
@@ -138,15 +126,8 @@ namespace API.Controllers
                         user.CreatedAt
                     }
                 });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    Success = false,
-                    Message = $"Lỗi server: {ex.Message}"
-                });
-            }
+            
+           
         }
 
         [HttpPut("users/{id}")]

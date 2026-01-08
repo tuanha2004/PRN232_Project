@@ -9,13 +9,11 @@ namespace API.DTOs.Applications
         public int JobId { get; set; }
 
         [StringLength(20, ErrorMessage = "Số điện thoại không được quá 20 ký tự")]
-        [RegularExpression(@"^(0|\+84)[0-9]{9,10}$", 
-            ErrorMessage = "Số điện thoại không hợp lệ (VD: 0123456789 hoặc +84123456789)")]
         public string? Phone { get; set; }
 
         [StringLength(20, ErrorMessage = "Năm học không được quá 20 ký tự")]
-        [RegularExpression("^(Year 1|Year 2|Year 3|Year 4|Graduate)$",
-            ErrorMessage = "Năm học phải là: Year 1, Year 2, Year 3, Year 4, hoặc Graduate")]
+        [RegularExpression("^(Year 1|Year 2|Year 3|Year 4)$",
+            ErrorMessage = "Năm học phải là: Year 1, Year 2, Year 3, Year 4")]
         public string? StudentYear { get; set; }
 
         [StringLength(20, ErrorMessage = "Loại công việc không được quá 20 ký tự")]

@@ -231,7 +231,6 @@ namespace Project_PRN232.Controllers
             if (result.Success)
             {
                 TempData["SuccessMessage"] = result.Message;
-
                 return RedirectToAction("ResetPassword", new { email = model.Email });
             }
             else

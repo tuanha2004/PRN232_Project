@@ -6,6 +6,7 @@ using API.Models;
 using API.DTOs.Jobs;
 using API.DTOs.Applications;
 using Microsoft.AspNetCore.OData.Query;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -15,10 +16,12 @@ namespace API.Controllers
     public class ProviderJobsController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
+        private readonly IEmailService _emailService;
 
-        public ProviderJobsController(ProjectPrn232Context context)
+        public ProviderJobsController(ProjectPrn232Context context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         private async Task<int?> GetCurrentProviderIdAsync()
@@ -465,6 +468,7 @@ namespace API.Controllers
 
                 var application = await _context.Applications
                     .Include(a => a.Job)
+                        .ThenInclude(j => j!.Provider)
                     .Include(a => a.Student)
                     .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
 
@@ -517,6 +521,22 @@ namespace API.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+
+                if (oldStatus != request.Status && (request.Status == "Approved" || request.Status == "Rejected"))
+                {
+                    if (application.Student != null && !string.IsNullOrEmpty(application.Student.Email))
+                    {
+                        var emailStatus = request.Status == "Approved" ? "Accepted" : request.Status;
+                        
+                        await _emailService.SendApplicationStatusEmailAsync(
+                            application.Student.Email,
+                            application.Student.FullName ?? "Bạn",
+                            application.Job?.Title ?? "Công việc",
+                            emailStatus,
+                            application.Job?.Provider?.FullName ?? "Provider"
+                        );
+                    }
+                }
 
                 return Ok(new
                 {

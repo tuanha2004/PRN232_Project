@@ -1,5 +1,6 @@
 ﻿using API.DTOs.Applications;
 using API.Models;
+using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,12 @@ namespace API.Controllers
     public class ApplicationsController : ControllerBase
     {
         private readonly ProjectPrn232Context _context;
+        private readonly IEmailService _emailService;
 
-        public ApplicationsController(ProjectPrn232Context context)
+        public ApplicationsController(ProjectPrn232Context context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -38,7 +41,7 @@ namespace API.Controllers
         }
 
         [HttpGet("my")]
-        [Authorize(Roles = "Student,Admin")]
+        [Authorize(Roles = "Student")]
         public async Task<ActionResult<IEnumerable<Application>>> GetMyApplications()
         {
             try
@@ -77,9 +80,7 @@ namespace API.Controllers
                             a.Job.EndDate,
                             a.Job.Status,
                             a.Job.CreatedAt,
-                            ProviderName = a.Job.Provider != null ? a.Job.Provider.FullName : null,
-                            ProviderEmail = a.Job.Provider != null ? a.Job.Provider.Email : null,
-                            CompanyName = a.Job.Provider != null ? a.Job.Provider.FullName : null
+                            ProviderName = a.Job.Provider != null ? a.Job.Provider.FullName : null
                         } : null
                     })
                     .ToListAsync();
@@ -147,7 +148,10 @@ namespace API.Controllers
                     return NotFound(new { Message = "Không tìm thấy user" });
                 }
 
-                var job = await _context.Jobs.FindAsync(request.JobId);
+                var job = await _context.Jobs
+                    .Include(j => j.Provider)
+                    .FirstOrDefaultAsync(j => j.JobId == request.JobId);
+                    
                 if (job == null)
                 {
                     return NotFound(new { Message = "Không tìm thấy công việc" });
@@ -176,6 +180,19 @@ namespace API.Controllers
                 _context.Applications.Add(application);
                 await _context.SaveChangesAsync();
 
+                if (job.Provider != null && !string.IsNullOrEmpty(job.Provider.Email))
+                {
+                    await _emailService.SendNewApplicationEmailAsync(
+                        job.Provider.Email,
+                        job.Provider.FullName ?? "Nhà tuyển dụng",
+                        job.Title ?? "Công việc",
+                        user.FullName ?? "Ứng viên",
+                        request.Phone,
+                        request.StudentYear,
+                        request.WorkType
+                    );
+                }
+
                 return Ok(new 
                 { 
                     Message = "Đơn ứng tuyển đã được gửi thành công!",
@@ -190,7 +207,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Provider")]
         public async Task<IActionResult> UpdateApplicationStatus(int id, [FromBody] UpdateApplicationStatusRequest request)
         {
             try
@@ -204,15 +221,36 @@ namespace API.Controllers
                     });
                 }
 
-                var application = await _context.Applications.FindAsync(id);
+                var application = await _context.Applications
+                    .Include(a => a.Student)
+                    .Include(a => a.Job)
+                        .ThenInclude(j => j!.Provider)
+                    .FirstOrDefaultAsync(a => a.ApplicationId == id);
                 
                 if (application == null)
                 {
                     return NotFound(new { Message = "Không tìm thấy đơn ứng tuyển" });
                 }
 
+                var oldStatus = application.Status;
                 application.Status = request.Status;
                 await _context.SaveChangesAsync();
+
+                if (oldStatus != request.Status && (request.Status == "Accepted" || request.Status == "Approved" || request.Status == "Rejected"))
+                {
+                    if (application.Student != null && !string.IsNullOrEmpty(application.Student.Email))
+                    {
+                        var emailStatus = request.Status == "Approved" ? "Accepted" : request.Status;
+                        
+                        await _emailService.SendApplicationStatusEmailAsync(
+                            application.Student.Email,
+                            application.Student.FullName ?? "Bạn",
+                            application.Job?.Title ?? "Công việc",
+                            emailStatus,
+                            application.Job?.Provider?.FullName ?? "Provider"
+                        );
+                    }
+                }
 
                 return Ok(new { Message = "Cập nhật trạng thái thành công", Application = application });
             }
