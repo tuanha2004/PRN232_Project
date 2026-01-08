@@ -1,0 +1,144 @@
+@model List<AttendanceRecordDto>
+
+@{
+    ViewData["Title"] = "Attendance by Student";
+    var studentId = ViewBag.StudentId;
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-person-badge-fill"></i> Attendance Records - Student #@studentId</h2>
+            @if (Model.Any())
+            {
+                <p class="text-muted">Student: <strong>@Model.First().StudentName</strong> (@Model.First().StudentEmail)</p>
+            }
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Records" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> All Records
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Total Records: @Model.Count</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <!-- Student Performance Summary -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="alert alert-primary">
+                            <strong>Total Checkins:</strong> @Model.Count
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success">
+                            <strong>Completed:</strong> @Model.Count(r => r.Status == "Completed")
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-warning">
+                            <strong>In Progress:</strong> @Model.Count(r => r.Status == "In Progress")
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-info">
+                            <strong>Total Hours:</strong> @Model.Where(r => r.WorkDuration.HasValue).Sum(r => r.WorkDuration.Value).ToString("N2")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Job</th>
+                                <th>Check-in Time</th>
+                                <th>Check-out Time</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.OrderByDescending(r => r.CheckinTime))
+                            {
+                                <tr>
+                                    <td>@record.CheckinId</td>
+                                    <td>
+                                        <strong>@record.JobTitle</strong><br />
+                                        <a asp-action="ByJob" asp-route-jobId="@record.JobId" class="btn btn-sm btn-outline-success mt-1">
+                                            <i class="bi bi-briefcase"></i> View Job
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (record.CheckinTime.HasValue)
+                                        {
+                                            <span>@record.CheckinTime.Value.ToString("dd/MM/yyyy")</span><br />
+                                            <strong>@record.CheckinTime.Value.ToString("HH:mm")</strong>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.CheckoutTime.HasValue)
+                                        {
+                                            <span>@record.CheckoutTime.Value.ToString("dd/MM/yyyy")</span><br />
+                                            <strong>@record.CheckoutTime.Value.ToString("HH:mm")</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.WorkDuration.HasValue)
+                                        {
+                                            <strong class="text-success">@record.WorkDuration.Value.ToString("N2")h</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.Status == "Completed")
+                                        {
+                                            <span class="badge bg-success">Completed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">In Progress</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@record.CheckinId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Student này chưa có attendance record nào.
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+@model List<UserDto>
+
+@{
+    ViewData["Title"] = "Quản Lý Users";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="bi bi-people-fill"></i> Quản Lý Users</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="CreateUser" class="btn btn-success">
+                <i class="bi bi-person-plus-fill"></i> Tạo User Mới
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Danh Sách Users (Không Bao Gồm Admin)</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped" id="usersTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ Tên</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Địa Chỉ</th>
+                                <th>Trạng Thái</th>
+                                <th>Ngày Tạo</th>
+                                <th style="width: 250px;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr id="user-row-@user.UserId">
+                                    <td>@user.UserId</td>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <span class="badge bg-info">@user.Role</span>
+                                    </td>
+                                    <td>@user.Phone</td>
+                                    <td>@user.Address</td>
+                                    <td>
+                                        @if (user.Status == "Active")
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Vô hiệu</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="EditUser" asp-route-id="@user.UserId" 
+                                               class="btn btn-primary" title="Sửa">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+                                            <a asp-action="ResetPassword" asp-route-id="@user.UserId" 
+                                               class="btn btn-warning" title="Reset mật khẩu">
+                                                <i class="bi bi-arrow-clockwise"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-info" 
+                                                    onclick="toggleStatus(@user.UserId)" title="Toggle Status">
+                                                <i class="bi bi-toggle-on"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger" 
+                                                    onclick="deleteUser(@user.UserId, '@user.FullName')" title="Xóa">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Chưa có user nào trong hệ thống.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteUser(userId, fullName) {
+            if (confirm(`Bạn có chắc chắn muốn xóa user "${fullName}"?`)) {
+                fetch(`/Admin/DeleteUser/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Xóa dòng khỏi table
+                        document.getElementById(`user-row-${userId}`).remove();
+                        
+                        // Hiển thị thông báo
+                        showAlert('success', data.message);
+                        
+                        // Reload trang sau 1.5s
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Có lỗi xảy ra: ' + error);
+                });
+            }
+        }
+
+        function toggleStatus(userId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái user này?')) {
+                fetch(`/Admin/ToggleStatus/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        
+                        // Reload trang sau 1s
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Có lỗi xảy ra: ' + error);
+                });
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // DataTables initialization (if you have it installed)
+        $(document).ready(function() {
+            if ($.fn.DataTable) {
+                $('#usersTable').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
+                    },
+                    "pageLength": 10,
+                    "order": [[0, "desc"]]
+                });
+            }
+        });
+    </script>
+}
+
+<form id="antiforgeryForm">
+    @Html.AntiForgeryToken()
+</form>

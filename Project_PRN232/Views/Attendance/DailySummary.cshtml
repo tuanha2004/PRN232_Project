@@ -1,0 +1,187 @@
+@model List<DailySummaryDto>
+
+@{
+    ViewData["Title"] = "Daily Summary";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-calendar-week-fill"></i> Daily Attendance Summary</h2>
+            <p class="text-muted">Tổng hợp attendance 7 ngày gần nhất</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a asp-action="Records" class="btn btn-primary">
+                <i class="bi bi-list-ul"></i> All Records
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <!-- Summary Chart Area -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h4 class="text-primary">@Model.Sum(d => d.TotalCheckins)</h4>
+                        <small>Total Checkins (7 days)</small>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-success">@Model.Sum(d => d.CompletedCheckins)</h4>
+                        <small>Completed</small>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-warning">@Model.Sum(d => d.UniqueStudents)</h4>
+                        <small>Total Unique Students</small>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-info">@Model.Sum(d => d.TotalWorkHours).ToString("N2")</h4>
+                        <small>Total Work Hours</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Breakdown -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar3"></i> Daily Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Day of Week</th>
+                                <th>Total Checkins</th>
+                                <th>Completed</th>
+                                <th>Unique Students</th>
+                                <th>Total Work Hours</th>
+                                <th>Avg Hours/Student</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var day in Model)
+                            {
+                                var dayOfWeek = day.Date.ToString("dddd");
+                                var isToday = day.Date.Date == DateTime.Now.Date;
+                                var isWeekend = day.Date.DayOfWeek == DayOfWeek.Saturday || day.Date.DayOfWeek == DayOfWeek.Sunday;
+
+                                <tr class="@(isToday ? "table-info" : "")">
+                                    <td>
+                                        <strong>@day.Date.ToString("dd/MM/yyyy")</strong>
+                                        @if (isToday)
+                                        {
+                                            <span class="badge bg-info">Today</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isWeekend)
+                                        {
+                                            <span class="badge bg-secondary">@dayOfWeek</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@dayOfWeek</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@day.TotalCheckins</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">@day.CompletedCheckins</span>
+                                        @if (day.TotalCheckins > 0)
+                                        {
+                                            <small class="text-muted">
+                                                (@((day.CompletedCheckins * 100.0 / day.TotalCheckins).ToString("N0"))%)
+                                            </small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong class="text-warning">@day.UniqueStudents</strong>
+                                    </td>
+                                    <td>
+                                        <strong class="text-info">@day.TotalWorkHours.ToString("N2")</strong>
+                                    </td>
+                                    <td>
+                                        @if (day.UniqueStudents > 0)
+                                        {
+                                            <strong>@((day.TotalWorkHours / day.UniqueStudents).ToString("N2"))</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <td colspan="2"><strong>TOTAL (7 days):</strong></td>
+                                <td><strong>@Model.Sum(d => d.TotalCheckins)</strong></td>
+                                <td><strong>@Model.Sum(d => d.CompletedCheckins)</strong></td>
+                                <td><strong>@Model.Sum(d => d.UniqueStudents)</strong></td>
+                                <td><strong>@Model.Sum(d => d.TotalWorkHours).ToString("N2")</strong></td>
+                                <td>-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual Chart (Simple Bar Chart using CSS) -->
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-fill"></i> Checkins Trend</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var maxCheckins = Model.Max(d => d.TotalCheckins);
+                }
+                @foreach (var day in Model.OrderBy(d => d.Date))
+                {
+                    var percentage = maxCheckins > 0 ? (day.TotalCheckins * 100.0 / maxCheckins) : 0;
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><strong>@day.Date.ToString("dd/MM")</strong> - @day.Date.ToString("ddd")</span>
+                            <span class="badge bg-primary">@day.TotalCheckins checkins</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: @percentage%" 
+                                 aria-valuenow="@day.TotalCheckins" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="@maxCheckins">
+                                @day.TotalWorkHours.ToString("N1")h
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có dữ liệu attendance trong 7 ngày qua.
+        </div>
+    }
+</div>
